@@ -13,9 +13,16 @@ import {
   Droplets,
   Sun,
   Download,
-  FileSpreadsheet,
   CheckCircle2,
   Cpu,
+  Clock,
+  RotateCcw,
+  Layers,
+  ShieldCheck,
+  FileText,
+  Search,
+  Radio,
+  Sparkles,
 } from "lucide-react";
 import {
   AreaChart,
@@ -227,6 +234,10 @@ export default function SensorHistoryPage() {
             <span className="text-xl sm:text-2xl font-black font-mono">{stats.avgTemp.toFixed(1)}</span>
             <span className="text-xs font-semibold text-slate-400">°C</span>
           </div>
+          <div className="flex items-center gap-1 text-[10px] font-semibold text-emerald-600 bg-emerald-50/80 px-2 py-0.5 rounded-md w-fit border border-emerald-100/60">
+            <CheckCircle2 className="w-3 h-3" />
+            <span>Rentang Normal</span>
+          </div>
         </div>
 
         <div className="bg-white p-3.5 sm:p-4 rounded-2xl border border-slate-200/80 shadow-[0_1px_3px_rgba(0,0,0,0.02)] space-y-2">
@@ -241,6 +252,10 @@ export default function SensorHistoryPage() {
           <div className="flex items-baseline gap-1 text-slate-900">
             <span className="text-xl sm:text-2xl font-black font-mono">{stats.avgHum.toFixed(1)}</span>
             <span className="text-xs font-semibold text-slate-400">%</span>
+          </div>
+          <div className="flex items-center gap-1 text-[10px] font-semibold text-blue-600 bg-blue-50/80 px-2 py-0.5 rounded-md w-fit border border-blue-100/60">
+            <Droplets className="w-3 h-3" />
+            <span>RH Terkendali</span>
           </div>
         </div>
 
@@ -257,6 +272,10 @@ export default function SensorHistoryPage() {
             <span className="text-xl sm:text-2xl font-black font-mono">{Math.round(stats.avgLight).toLocaleString()}</span>
             <span className="text-xs font-semibold text-slate-400">Lux</span>
           </div>
+          <div className="flex items-center gap-1 text-[10px] font-semibold text-amber-600 bg-amber-50/80 px-2 py-0.5 rounded-md w-fit border border-amber-100/60">
+            <Sun className="w-3 h-3" />
+            <span>Intensitas Ruang</span>
+          </div>
         </div>
 
         <div className="bg-white p-3.5 sm:p-4 rounded-2xl border border-slate-200/80 shadow-[0_1px_3px_rgba(0,0,0,0.02)] space-y-2">
@@ -272,10 +291,14 @@ export default function SensorHistoryPage() {
             <span className="text-xl sm:text-2xl font-black font-mono text-blue-600">{total}</span>
             <span className="text-xs font-semibold text-slate-400">baris</span>
           </div>
+          <div className="flex items-center gap-1 text-[10px] font-semibold text-indigo-600 bg-indigo-50/80 px-2 py-0.5 rounded-md w-fit border border-indigo-100/60">
+            <ShieldCheck className="w-3 h-3" />
+            <span>Database Sinkron</span>
+          </div>
         </div>
       </div>
 
-      {/* Filter Toolbar (Kompak & Rapi) */}
+      {/* Filter Toolbar (Kompak & Rapi dengan Ikon SVG) */}
       <div className="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200/80 shadow-[0_1px_3px_rgba(0,0,0,0.03)] space-y-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2 text-xs font-bold text-slate-800">
@@ -291,9 +314,10 @@ export default function SensorHistoryPage() {
                 setEndDate("");
                 setPage(1);
               }}
-              className="text-xs font-semibold text-blue-600 hover:text-blue-700 hover:underline"
+              className="inline-flex items-center gap-1 text-xs font-semibold text-blue-600 hover:text-blue-700 hover:underline"
             >
-              Reset Filter
+              <RotateCcw className="w-3 h-3" />
+              <span>Reset Filter</span>
             </button>
           ) : (
             <span className="text-[11px] text-slate-400 font-medium">Semua data</span>
@@ -302,22 +326,31 @@ export default function SensorHistoryPage() {
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-xs">
           <div>
-            <label className="block text-slate-500 font-semibold text-[11px] mb-1">ID Perangkat</label>
-            <input
-              type="text"
-              placeholder="Semua Perangkat"
-              value={deviceId}
-              onChange={(e) => {
-                setDeviceId(e.target.value);
-                setPage(1);
-              }}
-              className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-slate-50/50 hover:bg-white focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono text-xs transition"
-            />
+            <label className="flex items-center gap-1.5 text-slate-500 font-semibold text-[11px] mb-1">
+              <Cpu className="w-3 h-3 text-slate-400" />
+              <span>ID Perangkat</span>
+            </label>
+            <div className="relative">
+              <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+              <input
+                type="text"
+                placeholder="Semua Perangkat"
+                value={deviceId}
+                onChange={(e) => {
+                  setDeviceId(e.target.value);
+                  setPage(1);
+                }}
+                className="w-full pl-8 pr-3 py-2 rounded-xl border border-slate-200 bg-slate-50/50 hover:bg-white focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono text-xs transition"
+              />
+            </div>
           </div>
 
           <div className="grid grid-cols-2 gap-2 sm:col-span-2">
             <div>
-              <label className="block text-slate-500 font-semibold text-[11px] mb-1">Tanggal Mulai</label>
+              <label className="flex items-center gap-1.5 text-slate-500 font-semibold text-[11px] mb-1">
+                <Calendar className="w-3 h-3 text-slate-400" />
+                <span>Tanggal Mulai</span>
+              </label>
               <input
                 type="date"
                 value={startDate}
@@ -330,7 +363,10 @@ export default function SensorHistoryPage() {
             </div>
 
             <div>
-              <label className="block text-slate-500 font-semibold text-[11px] mb-1">Tanggal Selesai</label>
+              <label className="flex items-center gap-1.5 text-slate-500 font-semibold text-[11px] mb-1">
+                <Calendar className="w-3 h-3 text-slate-400" />
+                <span>Tanggal Selesai</span>
+              </label>
               <input
                 type="date"
                 value={endDate}
@@ -350,31 +386,32 @@ export default function SensorHistoryPage() {
         <div className="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200/80 shadow-[0_1px_3px_rgba(0,0,0,0.03)] space-y-3">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center border border-blue-100 shrink-0">
+              <div className="w-8 h-8 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center border border-blue-100 shrink-0 shadow-2xs">
                 <Activity className="w-4 h-4" />
               </div>
               <div className="flex items-center gap-2">
-                <h3 className="font-bold text-slate-900 text-sm">Tren Historis</h3>
+                <h3 className="font-bold text-slate-900 text-sm">Visualisasi Tren Sensor</h3>
                 <span className="text-[10px] font-semibold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full border border-slate-200/80">
                   {chartData.length} sampel
                 </span>
               </div>
             </div>
 
-            {/* Tab Switcher Pills */}
+            {/* Tab Switcher Pills dengan Ikon SVG */}
             <div className="grid grid-cols-4 w-full sm:w-auto sm:flex sm:items-center bg-slate-100/90 p-1 rounded-xl text-xs font-semibold text-slate-600 border border-slate-200/60">
               <button
                 onClick={() => setActiveChartTab("all")}
-                className={`px-2 py-1.5 rounded-lg transition-all text-center ${
-                  activeChartTab === "all" ? "bg-white text-slate-900 shadow-xs" : "hover:text-slate-900"
+                className={`inline-flex items-center justify-center gap-1 px-2 py-1.5 rounded-lg transition-all text-center ${
+                  activeChartTab === "all" ? "bg-white text-slate-900 shadow-xs font-bold" : "hover:text-slate-900"
                 }`}
               >
-                Semua
+                <Layers className="w-3.5 h-3.5 text-slate-500 shrink-0" />
+                <span>Semua</span>
               </button>
               <button
                 onClick={() => setActiveChartTab("temp")}
                 className={`inline-flex items-center justify-center gap-1 px-2 py-1.5 rounded-lg transition-all text-center ${
-                  activeChartTab === "temp" ? "bg-white text-rose-700 shadow-xs" : "hover:text-slate-900"
+                  activeChartTab === "temp" ? "bg-white text-rose-700 shadow-xs font-bold" : "hover:text-slate-900"
                 }`}
               >
                 <Thermometer className="w-3.5 h-3.5 text-rose-500 shrink-0" />
@@ -383,7 +420,7 @@ export default function SensorHistoryPage() {
               <button
                 onClick={() => setActiveChartTab("hum")}
                 className={`inline-flex items-center justify-center gap-1 px-2 py-1.5 rounded-lg transition-all text-center ${
-                  activeChartTab === "hum" ? "bg-white text-blue-700 shadow-xs" : "hover:text-slate-900"
+                  activeChartTab === "hum" ? "bg-white text-blue-700 shadow-xs font-bold" : "hover:text-slate-900"
                 }`}
               >
                 <Droplets className="w-3.5 h-3.5 text-blue-500 shrink-0" />
@@ -392,7 +429,7 @@ export default function SensorHistoryPage() {
               <button
                 onClick={() => setActiveChartTab("light")}
                 className={`inline-flex items-center justify-center gap-1 px-2 py-1.5 rounded-lg transition-all text-center ${
-                  activeChartTab === "light" ? "bg-white text-amber-700 shadow-xs" : "hover:text-slate-900"
+                  activeChartTab === "light" ? "bg-white text-amber-700 shadow-xs font-bold" : "hover:text-slate-900"
                 }`}
               >
                 <Sun className="w-3.5 h-3.5 text-amber-500 shrink-0" />
@@ -497,7 +534,7 @@ export default function SensorHistoryPage() {
             <span className="text-xs font-normal text-slate-400 font-mono">({total} entri)</span>
           </div>
           <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-500">
-            <span className="w-1.5 h-1.5 rounded-full bg-slate-400" />
+            <Radio className="w-3.5 h-3.5 text-slate-400" />
             <span>Sumber: {systemMode === "real" ? "ESP32 Fisik" : "Simulator"}</span>
           </div>
         </div>
@@ -510,13 +547,14 @@ export default function SensorHistoryPage() {
           </div>
         ) : (
           <>
-            {/* Tampilan Mobile: Kartu Vertikal Ringkas & Rapi */}
+            {/* Tampilan Mobile: Kartu Vertikal Ringkas & Rapi dengan Ikon SVG */}
             <div className="sm:hidden divide-y divide-slate-100">
               {records.map((r) => (
                 <div key={r.id} className="p-3.5 space-y-2.5 hover:bg-slate-50/50 transition">
                   <div className="flex items-center justify-between gap-2">
                     <div className="flex items-center gap-1.5 min-w-0">
-                      <span className="font-mono text-xs font-bold text-slate-800 bg-slate-100 px-2 py-0.5 rounded-md border border-slate-200/80 truncate">
+                      <span className="inline-flex items-center gap-1 font-mono text-xs font-bold text-slate-800 bg-slate-100 px-2 py-0.5 rounded-md border border-slate-200/80 truncate">
+                        <Cpu className="w-3 h-3 text-slate-400 shrink-0" />
                         {r.deviceId}
                       </span>
                       <span className="text-[10px] text-slate-400 font-mono shrink-0">
@@ -524,44 +562,52 @@ export default function SensorHistoryPage() {
                       </span>
                     </div>
                     <span
-                      className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold border shrink-0 ${
+                      className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold border shrink-0 ${
                         r.isSimulated
                           ? "bg-amber-50 text-amber-700 border-amber-200"
                           : "bg-emerald-50 text-emerald-700 border-emerald-200"
                       }`}
                     >
-                      <span
-                        className={`w-1 h-1 rounded-full ${
-                          r.isSimulated ? "bg-amber-500" : "bg-emerald-500 animate-pulse"
-                        }`}
-                      />
-                      {r.isSimulated ? "SIMULASI" : "DATA RIIL"}
+                      {r.isSimulated ? (
+                        <>
+                          <Sparkles className="w-3 h-3 text-amber-500" />
+                          <span>SIMULASI</span>
+                        </>
+                      ) : (
+                        <>
+                          <CheckCircle2 className="w-3 h-3 text-emerald-500" />
+                          <span>DATA RIIL</span>
+                        </>
+                      )}
                     </span>
                   </div>
 
-                  {/* 3 Metrik Micro-Grid */}
+                  {/* 3 Metrik Micro-Grid dengan Ikon SVG */}
                   <div className="grid grid-cols-3 gap-2 text-center bg-slate-50/80 p-2 rounded-xl border border-slate-100">
                     <div className="space-y-0.5">
-                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+                      <span className="flex items-center justify-center gap-1 text-[10px] font-bold text-rose-600 uppercase tracking-wider">
+                        <Thermometer className="w-2.5 h-2.5" />
                         Suhu
                       </span>
-                      <span className="text-xs font-black font-mono text-rose-600 block">
+                      <span className="text-xs font-black font-mono text-slate-900 block">
                         {r.temperature !== null ? `${r.temperature.toFixed(1)} °C` : "-"}
                       </span>
                     </div>
                     <div className="space-y-0.5 border-x border-slate-200/60 px-1">
-                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+                      <span className="flex items-center justify-center gap-1 text-[10px] font-bold text-blue-600 uppercase tracking-wider">
+                        <Droplets className="w-2.5 h-2.5" />
                         Lembap
                       </span>
-                      <span className="text-xs font-black font-mono text-blue-600 block">
+                      <span className="text-xs font-black font-mono text-slate-900 block">
                         {r.humidity !== null ? `${r.humidity.toFixed(1)} %` : "-"}
                       </span>
                     </div>
                     <div className="space-y-0.5">
-                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+                      <span className="flex items-center justify-center gap-1 text-[10px] font-bold text-amber-600 uppercase tracking-wider">
+                        <Sun className="w-2.5 h-2.5" />
                         Cahaya
                       </span>
-                      <span className="text-xs font-black font-mono text-amber-600 block">
+                      <span className="text-xs font-black font-mono text-slate-900 block">
                         {r.lightLux !== null ? `${Math.round(r.lightLux)} Lx` : "-"}
                       </span>
                     </div>
@@ -569,7 +615,10 @@ export default function SensorHistoryPage() {
 
                   {/* Waktu Rekam */}
                   <div className="text-[10px] text-slate-400 font-mono flex items-center justify-between pt-0.5">
-                    <span>Waktu Rekam</span>
+                    <span className="flex items-center gap-1">
+                      <Clock className="w-3 h-3 text-slate-400" />
+                      Waktu Rekam
+                    </span>
                     <span className="text-slate-600 font-medium">
                       {new Date(r.timestamp).toLocaleString("id-ID", {
                         day: "2-digit",
@@ -585,17 +634,47 @@ export default function SensorHistoryPage() {
               ))}
             </div>
 
-            {/* Tampilan Desktop: Tabel Lengkap */}
+            {/* Tampilan Desktop: Tabel Lengkap dengan Ikon SVG */}
             <div className="hidden sm:block overflow-x-auto">
               <table className="w-full text-left text-xs">
                 <thead>
                   <tr className="border-b border-slate-200 bg-slate-50/70 text-slate-500 font-bold uppercase tracking-wider text-[10px]">
-                    <th className="py-3 px-4">Waktu Rekam</th>
-                    <th className="py-3 px-4">ID Perangkat</th>
-                    <th className="py-3 px-4">Suhu (°C)</th>
-                    <th className="py-3 px-4">Kelembapan (%)</th>
-                    <th className="py-3 px-4">Cahaya (Lux)</th>
-                    <th className="py-3 px-4">Status</th>
+                    <th className="py-3 px-4">
+                      <span className="inline-flex items-center gap-1">
+                        <Clock className="w-3 h-3 text-slate-400" />
+                        Waktu Rekam
+                      </span>
+                    </th>
+                    <th className="py-3 px-4">
+                      <span className="inline-flex items-center gap-1">
+                        <Cpu className="w-3 h-3 text-slate-400" />
+                        ID Perangkat
+                      </span>
+                    </th>
+                    <th className="py-3 px-4">
+                      <span className="inline-flex items-center gap-1 text-rose-600">
+                        <Thermometer className="w-3 h-3" />
+                        Suhu (°C)
+                      </span>
+                    </th>
+                    <th className="py-3 px-4">
+                      <span className="inline-flex items-center gap-1 text-blue-600">
+                        <Droplets className="w-3 h-3" />
+                        Kelembapan (%)
+                      </span>
+                    </th>
+                    <th className="py-3 px-4">
+                      <span className="inline-flex items-center gap-1 text-amber-600">
+                        <Sun className="w-3 h-3" />
+                        Cahaya (Lux)
+                      </span>
+                    </th>
+                    <th className="py-3 px-4">
+                      <span className="inline-flex items-center gap-1">
+                        <ShieldCheck className="w-3 h-3 text-slate-400" />
+                        Status
+                      </span>
+                    </th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
@@ -618,13 +697,23 @@ export default function SensorHistoryPage() {
                       </td>
                       <td className="py-3 px-4">
                         <span
-                          className={`inline-flex px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${
+                          className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${
                             r.isSimulated
                               ? "bg-amber-50 text-amber-700 border-amber-200"
                               : "bg-emerald-50 text-emerald-700 border-emerald-200"
                           }`}
                         >
-                          {r.isSimulated ? "SIMULASI" : "DATA RIIL ESP32"}
+                          {r.isSimulated ? (
+                            <>
+                              <Sparkles className="w-3 h-3 text-amber-500" />
+                              <span>SIMULASI</span>
+                            </>
+                          ) : (
+                            <>
+                              <CheckCircle2 className="w-3 h-3 text-emerald-500" />
+                              <span>DATA RIIL ESP32</span>
+                            </>
+                          )}
                         </span>
                       </td>
                     </tr>
@@ -637,17 +726,20 @@ export default function SensorHistoryPage() {
 
         {/* Pagination Bar */}
         <div className="p-3.5 sm:p-4 border-t border-slate-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs text-slate-500">
-          <div className="text-center sm:text-left">
-            Halaman <span className="font-bold text-slate-700">{page}</span> dari{" "}
-            <span className="font-bold text-slate-700">{totalPages}</span>{" "}
-            <span className="text-slate-400">({total} total entri)</span>
+          <div className="flex items-center gap-1.5 text-center sm:text-left justify-center sm:justify-start">
+            <FileText className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+            <span>
+              Halaman <strong className="text-slate-700 font-bold">{page}</strong> dari{" "}
+              <strong className="text-slate-700 font-bold">{totalPages}</strong>{" "}
+              <span className="text-slate-400">({total} total entri)</span>
+            </span>
           </div>
 
           <div className="grid grid-cols-2 sm:flex sm:items-center gap-2 w-full sm:w-auto">
             <button
               onClick={() => setPage((p) => Math.max(1, p - 1))}
               disabled={page <= 1}
-              className="inline-flex items-center justify-center gap-1 px-3 py-1.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 font-bold disabled:opacity-40 disabled:cursor-not-allowed shadow-2xs"
+              className="inline-flex items-center justify-center gap-1 px-3 py-1.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 font-bold disabled:opacity-40 disabled:cursor-not-allowed shadow-2xs transition"
             >
               <ChevronLeft className="w-3.5 h-3.5" />
               <span>Sebelumnya</span>
@@ -655,7 +747,7 @@ export default function SensorHistoryPage() {
             <button
               onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
               disabled={page >= totalPages}
-              className="inline-flex items-center justify-center gap-1 px-3 py-1.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 font-bold disabled:opacity-40 disabled:cursor-not-allowed shadow-2xs"
+              className="inline-flex items-center justify-center gap-1 px-3 py-1.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 font-bold disabled:opacity-40 disabled:cursor-not-allowed shadow-2xs transition"
             >
               <span>Selanjutnya</span>
               <ChevronRight className="w-3.5 h-3.5" />
