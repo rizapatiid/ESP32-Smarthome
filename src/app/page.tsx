@@ -1,69 +1,148 @@
-import Image from "next/image";
+"use client";
 
-export default function Home() {
+import { useEffect, useState, useRef, useCallback } from "react";
+import StatusHeader from "@/components/dashboard/StatusHeader";
+import MetricCards from "@/components/dashboard/MetricCards";
+import LightControlCard from "@/components/dashboard/LightControlCard";
+import LiveTelemetryCharts, { ChartDataPoint } from "@/components/dashboard/LiveTelemetryCharts";
+import RecentControlTable from "@/components/dashboard/RecentControlTable";
+import { SystemStatus, SensorData, ControlLogItem } from "@/types/iot";
+
+export default function DashboardPage() {
+  const [status, setStatus] = useState<SystemStatus | null>(null);
+  const [sensorData, setSensorData] = useState<SensorData | null>(null);
+  const [lampState, setLampState] = useState<boolean>(false);
+  const [chartPoints, setChartPoints] = useState<ChartDataPoint[]>([]);
+  const [recentLogs, setRecentLogs] = useState<ControlLogItem[]>([]);
+  const [lastUpdated, setLastUpdated] = useState<string | null>(null);
+  const [errorNotice, setErrorNotice] = useState<string | null>(null);
+
+  const isPollingRef = useRef(false);
+
+  // Fungsi fetch data periodik
+  const pollData = useCallback(async () => {
+    if (isPollingRef.current) return;
+    isPollingRef.current = true;
+
+    try {
+      // 1. Ambil status sistem
+      const statusRes = await fetch("/api/status");
+      if (statusRes.ok) {
+        const sJson: SystemStatus = await statusRes.json();
+        setStatus(sJson);
+      }
+
+      // 2. Ambil data sensor live
+      const sensorRes = await fetch("/api/sensors");
+      if (sensorRes.ok) {
+        const senJson = await sensorRes.json();
+        if (senJson.success && senJson.data) {
+          setSensorData(senJson.data);
+          setLastUpdated(senJson.data.timestamp || new Date().toISOString());
+          setErrorNotice(null);
+
+          // Masukkan ke array titik grafik (simpan 25 titik terakhir)
+          setChartPoints((prev) => {
+            const next = [
+              ...prev,
+              {
+                time: senJson.data.timestamp || new Date().toISOString(),
+                temperature: senJson.data.temperature,
+                humidity: senJson.data.humidity,
+                lightLux: senJson.data.lightLux,
+              },
+            ];
+            return next.length > 25 ? next.slice(next.length - 25) : next;
+          });
+        } else {
+          setErrorNotice(senJson.error || "Gagal membaca sensor ESP32");
+        }
+      } else {
+        const errJson = await sensorRes.json().catch(() => ({}));
+        setErrorNotice(errJson.error || "Sensor tidak dapat diakses");
+      }
+
+      // 3. Ambil status lampu terkini
+      const lightRes = await fetch("/api/control/light");
+      if (lightRes.ok) {
+        const lJson = await lightRes.json();
+        if (typeof lJson.state === "boolean") {
+          setLampState(lJson.state);
+        }
+      }
+
+      // 4. Ambil 5 riwayat kontrol terbaru
+      const logRes = await fetch("/api/control/history?limit=5");
+      if (logRes.ok) {
+        const logJson = await logRes.json();
+        if (logJson.success && Array.isArray(logJson.data)) {
+          setRecentLogs(logJson.data);
+        }
+      }
+    } catch (err: unknown) {
+      console.warn("Polling error:", err);
+    } finally {
+      isPollingRef.current = false;
+    }
+  }, []);
+
+  // Set interval polling
+  useEffect(() => {
+    pollData();
+    const interval = setInterval(pollData, 2000);
+    return () => clearInterval(interval);
+  }, [pollData]);
+
+  // Handler toggle lampu
+  const handleToggleLamp = async (targetState: boolean) => {
+    try {
+      const res = await fetch("/api/control/light", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ state: targetState }),
+      });
+
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setLampState(Boolean(data.confirmedState ?? targetState));
+        // Refresh riwayat log segera
+        const logRes = await fetch("/api/control/history?limit=5");
+        if (logRes.ok) {
+          const logJson = await logRes.json();
+          if (logJson.data) setRecentLogs(logJson.data);
+        }
+        return { success: true, message: data.message };
+      } else {
+        return { success: false, error: data.error || "Gagal mengontrol lampu" };
+      }
+    } catch (err: unknown) {
+      return {
+        success: false,
+        error: err instanceof Error ? err.message : "Kesalahan koneksi",
+      };
+    }
+  };
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+    <div className="space-y-6">
+      {/* Status Header */}
+      <StatusHeader status={status} lastUpdated={lastUpdated} />
+
+      {/* Kartu Metrik Sensor */}
+      <MetricCards sensorData={sensorData} error={errorNotice} />
+
+      {/* Panel Kontrol Lampu */}
+      <LightControlCard
+        lampState={lampState}
+        isSimulated={sensorData?.isSimulated ?? true}
+        onToggle={handleToggleLamp}
+      />
+
+      {/* Grafik Telemetri Recharts */}
+      <LiveTelemetryCharts data={chartPoints} />
+
+      {/* Riwayat Kontrol Terkini */}
+      <RecentControlTable logs={recentLogs} />
     </div>
   );
 }
