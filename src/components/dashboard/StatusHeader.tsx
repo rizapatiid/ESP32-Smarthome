@@ -64,28 +64,41 @@ export default function StatusHeader({ status, lastUpdated }: Props) {
     <div className="space-y-4">
       {/* Hero Welcome Bar */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 bg-white p-4 sm:p-5 rounded-2xl border border-slate-200/80 shadow-[0_1px_3px_rgba(0,0,0,0.03)]">
-        <div className="flex items-start sm:items-center gap-3">
-          <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-gradient-to-tr from-blue-700 via-blue-600 to-indigo-600 text-white flex items-center justify-center shadow-md shadow-blue-500/20 shrink-0 mt-0.5 sm:mt-0">
+        <div className="flex items-center gap-3.5">
+          <div
+            className={`w-11 h-11 sm:w-12 sm:h-12 rounded-2xl flex items-center justify-center shrink-0 border transition-all shadow-xs ${
+              currentHour < 11
+                ? "bg-amber-50 border-amber-200/80 text-amber-600"
+                : currentHour < 15
+                ? "bg-amber-50 border-amber-200/80 text-amber-600"
+                : currentHour < 18
+                ? "bg-orange-50 border-orange-200/80 text-orange-600"
+                : "bg-indigo-50 border-indigo-200/80 text-indigo-600"
+            }`}
+          >
             {currentHour < 11 ? (
-              <Sunrise className="w-5 h-5 text-amber-200" />
+              <Sunrise className="w-5 h-5" />
             ) : currentHour < 15 ? (
-              <Sun className="w-5 h-5 text-amber-200" />
+              <Sun className="w-5 h-5" />
             ) : currentHour < 18 ? (
-              <Sunset className="w-5 h-5 text-orange-200" />
+              <Sunset className="w-5 h-5" />
             ) : (
-              <Moon className="w-5 h-5 text-indigo-100" />
+              <Moon className="w-5 h-5" />
             )}
           </div>
 
           <div className="min-w-0">
             <div className="flex items-center gap-2">
-              <h1 className="text-base sm:text-xl md:text-2xl font-bold text-slate-900 tracking-tight leading-snug">
-                {greeting}, Sistem SmartHome Aktif
+              <h1 className="text-base sm:text-xl font-bold text-slate-900 tracking-tight">
+                {greeting}
               </h1>
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0 hidden sm:inline-block" title="Sistem Aktif" />
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 shrink-0">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                Sistem Aktif
+              </span>
             </div>
 
-            <div className="mt-0.5 sm:mt-1 flex items-center gap-1.5 text-xs text-slate-500">
+            <div className="mt-0.5 flex items-center gap-1.5 text-xs text-slate-500">
               <Clock className="w-3.5 h-3.5 text-slate-400 shrink-0" />
               <span>{currentDateStr || "Memuat kalender..."}</span>
             </div>
@@ -96,7 +109,7 @@ export default function StatusHeader({ status, lastUpdated }: Props) {
         <div className="grid grid-cols-2 gap-2 w-full md:w-auto md:flex md:items-center pt-1 md:pt-0">
           <Link
             href="/devices"
-            className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200/80 active:scale-[0.98] transition shadow-xs text-center"
+            className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl text-xs font-semibold text-slate-700 bg-slate-50 hover:bg-slate-100 border border-slate-200/80 active:scale-[0.98] transition shadow-xs text-center"
           >
             <Radio className="w-3.5 h-3.5 text-blue-600 shrink-0" />
             <span>Scan ESP32</span>
@@ -104,7 +117,7 @@ export default function StatusHeader({ status, lastUpdated }: Props) {
 
           <Link
             href="/history/sensors"
-            className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl text-xs font-semibold text-blue-700 bg-blue-50 hover:bg-blue-100/80 active:scale-[0.98] transition shadow-xs text-center"
+            className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl text-xs font-semibold text-blue-700 bg-blue-50/70 hover:bg-blue-100/80 border border-blue-200/60 active:scale-[0.98] transition shadow-xs text-center"
           >
             <span>Riwayat Database</span>
             <ExternalLink className="w-3.5 h-3.5 shrink-0" />
