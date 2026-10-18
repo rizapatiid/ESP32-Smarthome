@@ -69,24 +69,24 @@ export default function WiringSchematicModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-slate-950/75 backdrop-blur-xs animate-in fade-in duration-150">
-      <div className="bg-white rounded-2xl border border-slate-200/90 shadow-2xl w-full max-w-5xl max-h-[95vh] flex flex-col overflow-hidden">
+      <div className="bg-white rounded-2xl border border-slate-200/90 shadow-2xl w-full max-w-5xl xl:max-w-6xl max-h-[95vh] flex flex-col overflow-hidden">
         {/* Header Modal */}
-        <div className="p-4 sm:p-5 border-b border-slate-100 flex items-center justify-between gap-3 shrink-0 bg-slate-50/70">
-          <div className="flex items-center gap-3">
+        <div className="p-4 sm:p-5 border-b border-slate-100 flex items-start sm:items-center justify-between gap-3 shrink-0 bg-slate-50/70">
+          <div className="flex items-center gap-3 min-w-0">
             <div className="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center shadow-md shadow-blue-500/20 shrink-0">
               <Cpu className="w-5 h-5" />
             </div>
-            <div>
+            <div className="min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
-                <h3 className="font-black text-slate-900 text-sm sm:text-base tracking-tight">
+                <h3 className="font-black text-slate-900 text-sm sm:text-base tracking-tight whitespace-nowrap">
                   Skema Visual Elektronika ESP32 DevKit V1
                 </h3>
-                <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200">
+                <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 whitespace-nowrap">
                   <Database className="w-2.5 h-2.5" />
                   <span>{effectiveLights.length} Relay Aktif di DB</span>
                 </span>
               </div>
-              <p className="text-[11px] text-slate-500">
+              <p className="text-[11px] text-slate-500 mt-0.5 truncate sm:overflow-visible sm:whitespace-normal">
                 Diagram pengkabelan pin hardware yang presisi dan tersinkronisasi langsung dengan database.
               </p>
             </div>
@@ -94,21 +94,22 @@ export default function WiringSchematicModal({
 
           <button
             onClick={onClose}
-            className="text-slate-400 hover:text-slate-700 p-1.5 rounded-xl hover:bg-slate-200/60 transition"
+            className="text-slate-400 hover:text-slate-700 p-2 rounded-xl hover:bg-slate-200/60 transition shrink-0 cursor-pointer"
+            title="Tutup Modal"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Toolbar Filter & Zoom */}
-        <div className="px-4 py-2 border-b border-slate-100 bg-white flex flex-wrap items-center justify-between gap-2 shrink-0">
-          <div className="flex items-center gap-1.5 overflow-x-auto text-xs py-0.5">
-            <span className="text-slate-400 text-[11px] font-semibold mr-1 hidden sm:inline">
+        <div className="px-4 py-2.5 border-b border-slate-100 bg-white flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 shrink-0">
+          <div className="flex flex-wrap items-center gap-1.5 text-xs">
+            <span className="text-slate-400 text-[11px] font-semibold mr-0.5 hidden sm:inline">
               Sorot Jalur:
             </span>
             <button
               onClick={() => setActiveFilter("all")}
-              className={`px-3 py-1.5 rounded-lg font-bold transition text-[11px] whitespace-nowrap ${
+              className={`px-3 py-1.5 rounded-lg font-bold transition text-[11px] whitespace-nowrap cursor-pointer ${
                 activeFilter === "all"
                   ? "bg-slate-900 text-white shadow-xs"
                   : "bg-slate-100 text-slate-600 hover:bg-slate-200"
@@ -118,7 +119,7 @@ export default function WiringSchematicModal({
             </button>
             <button
               onClick={() => setActiveFilter("dht22")}
-              className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-lg font-bold transition text-[11px] whitespace-nowrap ${
+              className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-lg font-bold transition text-[11px] whitespace-nowrap cursor-pointer ${
                 activeFilter === "dht22"
                   ? "bg-blue-600 text-white shadow-xs"
                   : "bg-blue-50 text-blue-700 hover:bg-blue-100"
@@ -129,7 +130,7 @@ export default function WiringSchematicModal({
             </button>
             <button
               onClick={() => setActiveFilter("bh1750")}
-              className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-lg font-bold transition text-[11px] whitespace-nowrap ${
+              className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-lg font-bold transition text-[11px] whitespace-nowrap cursor-pointer ${
                 activeFilter === "bh1750"
                   ? "bg-amber-600 text-white shadow-xs"
                   : "bg-amber-50 text-amber-700 hover:bg-amber-100"
@@ -140,7 +141,7 @@ export default function WiringSchematicModal({
             </button>
             <button
               onClick={() => setActiveFilter("relay")}
-              className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-lg font-bold transition text-[11px] whitespace-nowrap ${
+              className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-lg font-bold transition text-[11px] whitespace-nowrap cursor-pointer ${
                 activeFilter === "relay"
                   ? "bg-emerald-600 text-white shadow-xs"
                   : "bg-emerald-50 text-emerald-700 hover:bg-emerald-100"
@@ -151,12 +152,12 @@ export default function WiringSchematicModal({
             </button>
           </div>
 
-          <div className="flex items-center gap-1.5 text-[11px]">
+          <div className="flex items-center gap-1.5 text-[11px] self-end sm:self-auto shrink-0">
             <button
               onClick={() => setIsZoomed(!isZoomed)}
-              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 font-semibold"
+              className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 font-semibold cursor-pointer transition whitespace-nowrap"
             >
-              <ZoomIn className="w-3.5 h-3.5" />
+              <ZoomIn className="w-3.5 h-3.5 text-slate-500" />
               <span>{isZoomed ? "Reset Ukuran" : "Perbesar Diagram"}</span>
             </button>
           </div>
@@ -585,7 +586,36 @@ export default function WiringSchematicModal({
                   </text>
                 </g>
 
-                {/* WIRE 6: Relay VCC Koil (Merah) ➔ VIN 5V */}
+                {/* WIRE 6: BH1750 VCC (Merah Putus-putus) ➔ 3.3V */}
+                {/* Berakhir TEPAT di x=670 y=206 (Pin VCC sisi kiri box BH1750) */}
+                <g opacity={isBhActive ? 1 : 0.08} className="transition-opacity duration-200">
+                  <path
+                    d="M 54 185 C 20 185, 20 206, 380 206 C 480 206, 580 206, 670 206"
+                    fill="none"
+                    stroke="#ef4444"
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                    strokeDasharray="6,3"
+                  />
+                  <circle cx="54" cy="185" r="4" fill="#ef4444" />
+                  <circle cx="670" cy="206" r="4" fill="#ef4444" />
+                </g>
+
+                {/* WIRE 7: BH1750 GND (Abu-abu) ➔ GND */}
+                {/* Berakhir TEPAT di x=670 y=224 (Pin GND sisi kiri box BH1750) */}
+                <g opacity={isBhActive ? 1 : 0.08} className="transition-opacity duration-200">
+                  <path
+                    d="M 54 215 C 25 215, 25 224, 390 224 C 500 224, 590 224, 670 224"
+                    fill="none"
+                    stroke="#94a3b8"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                  />
+                  <circle cx="54" cy="215" r="3.5" fill="#94a3b8" />
+                  <circle cx="670" cy="224" r="3.5" fill="#94a3b8" />
+                </g>
+
+                {/* WIRE 8: Relay VCC Koil (Merah) ➔ VIN 5V */}
                 {/* Berakhir TEPAT di x=620 y=333 (Terminal VCC sisi kiri box Relay) */}
                 <g opacity={isRelayActive ? 1 : 0.08} className="transition-opacity duration-200">
                   <path
@@ -598,6 +628,20 @@ export default function WiringSchematicModal({
                   />
                   <circle cx="256" cy="185" r="3.5" fill="#ef4444" />
                   <circle cx="620" cy="333" r="3.5" fill="#ef4444" />
+                </g>
+
+                {/* WIRE 9: Relay GND Koil (Abu-abu) ➔ GND */}
+                {/* Berakhir TEPAT di x=620 y=351 (Terminal GND sisi kiri box Relay) */}
+                <g opacity={isRelayActive ? 1 : 0.08} className="transition-opacity duration-200">
+                  <path
+                    d="M 256 215 C 330 215, 470 351, 620 351"
+                    fill="none"
+                    stroke="#94a3b8"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                  />
+                  <circle cx="256" cy="215" r="3.5" fill="#94a3b8" />
+                  <circle cx="620" cy="351" r="3.5" fill="#94a3b8" />
                 </g>
 
                 {/* DYNAMIC JUMPER WIRES FOR EVERY LIGHT FROM DATABASE */}
@@ -653,79 +697,107 @@ export default function WiringSchematicModal({
           {/* TABEL LENGKAP SAMBUNGAN PINOUT (TERSINKRON DATABASE)          */}
           {/* ============================================================== */}
           <div className="space-y-3">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
               <h4 className="font-extrabold text-slate-900 text-xs sm:text-sm flex items-center gap-2">
-                <Layers className="w-4 h-4 text-blue-600" />
+                <Layers className="w-4 h-4 text-blue-600 shrink-0" />
                 <span>Tabel Rujukan Sambungan Pinout Hardware</span>
               </h4>
-              <span className="text-[11px] font-mono text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">
-                Tersinkron Database ({effectiveLights.length} Relay Aktif)
+              <span className="text-[11px] font-mono text-emerald-800 bg-emerald-50 px-2.5 py-1 rounded-md border border-emerald-200 whitespace-nowrap self-start sm:self-auto flex items-center gap-1.5">
+                <Database className="w-3 h-3 text-emerald-600 shrink-0" />
+                <span>Tersinkron Database ({effectiveLights.length} Relay Aktif)</span>
               </span>
             </div>
 
             <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-2xs">
-              <table className="w-full text-left text-xs">
+              <table className="w-full text-left text-xs min-w-[720px]">
                 <thead>
                   <tr className="bg-slate-50 border-b border-slate-200/80 text-slate-600 text-[11px] font-bold">
-                    <th className="py-2.5 px-3">Komponen</th>
-                    <th className="py-2.5 px-3">Pin Komponen</th>
-                    <th className="py-2.5 px-3">Pin Fisik ESP32</th>
-                    <th className="py-2.5 px-3">Warna Kabel</th>
-                    <th className="py-2.5 px-3">Fungsi / Status Database</th>
+                    <th className="py-2.5 px-3.5 whitespace-nowrap w-[180px]">Komponen</th>
+                    <th className="py-2.5 px-3.5 whitespace-nowrap w-[170px]">Pin Komponen</th>
+                    <th className="py-2.5 px-3.5 whitespace-nowrap w-[160px]">Pin Fisik ESP32</th>
+                    <th className="py-2.5 px-3.5 whitespace-nowrap w-[130px]">Warna Kabel</th>
+                    <th className="py-2.5 px-3.5">Fungsi / Status Database</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 text-[11px]">
-                  {/* DHT22 */}
+                  {/* DHT22 Data */}
                   <tr className="hover:bg-blue-50/30 transition">
-                    <td className="py-2 px-3 font-bold text-blue-900">DHT22 (Sensor)</td>
-                    <td className="py-2 px-3 font-mono font-semibold">DATA / OUT</td>
-                    <td className="py-2 px-3">
-                      <span className="px-2 py-0.5 rounded bg-blue-100 text-blue-800 font-mono font-bold">
+                    <td className="py-2.5 px-3.5 font-bold text-blue-900 whitespace-nowrap">DHT22 (Sensor)</td>
+                    <td className="py-2.5 px-3.5 font-mono font-semibold text-slate-700 whitespace-nowrap">DATA / OUT</td>
+                    <td className="py-2.5 px-3.5 whitespace-nowrap">
+                      <span className="inline-block px-2.5 py-0.5 rounded-md bg-blue-100 text-blue-800 font-mono font-bold whitespace-nowrap">
                         GPIO 4 (D4)
                       </span>
                     </td>
-                    <td className="py-2 px-3 flex items-center gap-1.5">
-                      <span className="w-2.5 h-2.5 rounded-full bg-blue-600 inline-block"></span>
-                      <span>Biru</span>
+                    <td className="py-2.5 px-3.5 whitespace-nowrap">
+                      <span className="inline-flex items-center gap-1.5">
+                        <span className="w-2.5 h-2.5 rounded-full bg-blue-600 shrink-0"></span>
+                        <span className="font-medium text-slate-700">Biru</span>
+                      </span>
                     </td>
-                    <td className="py-2 px-3 text-slate-500">Membaca suhu &amp; kelembapan udara</td>
-                  </tr>
-                  <tr className="hover:bg-slate-50 transition">
-                    <td className="py-2 px-3 font-semibold text-slate-700">DHT22 (Power)</td>
-                    <td className="py-2 px-3 font-mono">VCC &amp; GND</td>
-                    <td className="py-2 px-3 font-mono text-slate-700">3V3 &amp; GND</td>
-                    <td className="py-2 px-3">Merah &amp; Hitam</td>
-                    <td className="py-2 px-3 text-slate-500">Tegangan kerja 3.3V</td>
+                    <td className="py-2.5 px-3.5 text-slate-500">Membaca suhu &amp; kelembapan udara</td>
                   </tr>
 
-                  {/* BH1750 */}
+                  {/* DHT22 Power */}
+                  <tr className="hover:bg-slate-50 transition">
+                    <td className="py-2.5 px-3.5 font-semibold text-slate-700 whitespace-nowrap">DHT22 (Power)</td>
+                    <td className="py-2.5 px-3.5 font-mono text-slate-700 whitespace-nowrap">VCC &amp; GND</td>
+                    <td className="py-2.5 px-3.5 whitespace-nowrap font-mono text-slate-700">
+                      <span className="inline-block px-2 py-0.5 rounded bg-slate-100 text-slate-800 font-mono font-semibold whitespace-nowrap">
+                        3V3 &amp; GND
+                      </span>
+                    </td>
+                    <td className="py-2.5 px-3.5 whitespace-nowrap text-slate-700">Merah &amp; Abu-abu</td>
+                    <td className="py-2.5 px-3.5 text-slate-500">Tegangan kerja 3.3V &amp; Ground</td>
+                  </tr>
+
+                  {/* BH1750 SDA */}
                   <tr className="hover:bg-amber-50/30 transition">
-                    <td className="py-2 px-3 font-bold text-amber-900">BH1750 (Sensor)</td>
-                    <td className="py-2 px-3 font-mono font-semibold">SDA (Data)</td>
-                    <td className="py-2 px-3">
-                      <span className="px-2 py-0.5 rounded bg-amber-100 text-amber-800 font-mono font-bold">
+                    <td className="py-2.5 px-3.5 font-bold text-amber-900 whitespace-nowrap">BH1750 (Sensor)</td>
+                    <td className="py-2.5 px-3.5 font-mono font-semibold text-slate-700 whitespace-nowrap">SDA (Data)</td>
+                    <td className="py-2.5 px-3.5 whitespace-nowrap">
+                      <span className="inline-block px-2.5 py-0.5 rounded-md bg-amber-100 text-amber-800 font-mono font-bold whitespace-nowrap">
                         GPIO 21 (D21)
                       </span>
                     </td>
-                    <td className="py-2 px-3 flex items-center gap-1.5">
-                      <span className="w-2.5 h-2.5 rounded-full bg-amber-500 inline-block"></span>
-                      <span>Kuning</span>
+                    <td className="py-2.5 px-3.5 whitespace-nowrap">
+                      <span className="inline-flex items-center gap-1.5">
+                        <span className="w-2.5 h-2.5 rounded-full bg-amber-500 shrink-0"></span>
+                        <span className="font-medium text-slate-700">Kuning</span>
+                      </span>
                     </td>
-                    <td className="py-2 px-3 text-slate-500">I2C Data Bus intensitas cahaya (Lux)</td>
+                    <td className="py-2.5 px-3.5 text-slate-500">I2C Data Bus intensitas cahaya (Lux)</td>
                   </tr>
+
+                  {/* BH1750 SCL */}
                   <tr className="hover:bg-amber-50/30 transition">
-                    <td className="py-2 px-3 font-bold text-amber-900">BH1750 (Sensor)</td>
-                    <td className="py-2 px-3 font-mono font-semibold">SCL (Clock)</td>
-                    <td className="py-2 px-3">
-                      <span className="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-mono font-bold">
+                    <td className="py-2.5 px-3.5 font-bold text-amber-900 whitespace-nowrap">BH1750 (Sensor)</td>
+                    <td className="py-2.5 px-3.5 font-mono font-semibold text-slate-700 whitespace-nowrap">SCL (Clock)</td>
+                    <td className="py-2.5 px-3.5 whitespace-nowrap">
+                      <span className="inline-block px-2.5 py-0.5 rounded-md bg-emerald-100 text-emerald-800 font-mono font-bold whitespace-nowrap">
                         GPIO 22 (D22)
                       </span>
                     </td>
-                    <td className="py-2 px-3 flex items-center gap-1.5">
-                      <span className="w-2.5 h-2.5 rounded-full bg-emerald-600 inline-block"></span>
-                      <span>Hijau</span>
+                    <td className="py-2.5 px-3.5 whitespace-nowrap">
+                      <span className="inline-flex items-center gap-1.5">
+                        <span className="w-2.5 h-2.5 rounded-full bg-emerald-600 shrink-0"></span>
+                        <span className="font-medium text-slate-700">Hijau</span>
+                      </span>
                     </td>
-                    <td className="py-2 px-3 text-slate-500">I2C Clock Bus komunikasi sensor</td>
+                    <td className="py-2.5 px-3.5 text-slate-500">I2C Clock Bus komunikasi sensor</td>
+                  </tr>
+
+                  {/* BH1750 Power */}
+                  <tr className="hover:bg-slate-50 transition">
+                    <td className="py-2.5 px-3.5 font-semibold text-slate-700 whitespace-nowrap">BH1750 (Power)</td>
+                    <td className="py-2.5 px-3.5 font-mono text-slate-700 whitespace-nowrap">VCC &amp; GND</td>
+                    <td className="py-2.5 px-3.5 whitespace-nowrap font-mono text-slate-700">
+                      <span className="inline-block px-2 py-0.5 rounded bg-slate-100 text-slate-800 font-mono font-semibold whitespace-nowrap">
+                        3V3 &amp; GND
+                      </span>
+                    </td>
+                    <td className="py-2.5 px-3.5 whitespace-nowrap text-slate-700">Merah &amp; Abu-abu</td>
+                    <td className="py-2.5 px-3.5 text-slate-500">Tegangan kerja 3.3V (VCC) &amp; Ground</td>
                   </tr>
 
                   {/* Dynamic Relay Rows from Database */}
@@ -733,43 +805,49 @@ export default function WiringSchematicModal({
                     const pal = LIGHT_PALETTES[idx % LIGHT_PALETTES.length];
                     return (
                       <tr key={light.id} className="hover:bg-emerald-50/40 transition bg-emerald-50/15">
-                        <td className="py-2.5 px-3 font-bold text-slate-900 flex items-center gap-1.5">
-                          <span className={`w-2 h-2 rounded-full ${pal.dot}`}></span>
-                          <span>{light.name}</span>
-                          {light.isDefault && (
-                            <span className="text-[9px] font-bold px-1.5 py-0.2 rounded bg-blue-100 text-blue-700">
-                              Utama
-                            </span>
-                          )}
+                        <td className="py-2.5 px-3.5 font-bold text-slate-900 whitespace-nowrap">
+                          <span className="inline-flex items-center gap-1.5">
+                            <span className={`w-2.5 h-2.5 rounded-full ${pal.dot} shrink-0`}></span>
+                            <span>{light.name}</span>
+                            {light.isDefault && (
+                              <span className="text-[9px] font-bold px-1.5 py-0.2 rounded bg-blue-100 text-blue-700 whitespace-nowrap">
+                                Utama
+                              </span>
+                            )}
+                          </span>
                         </td>
-                        <td className="py-2.5 px-3 font-mono font-semibold text-slate-700">
+                        <td className="py-2.5 px-3.5 font-mono font-semibold text-slate-700 whitespace-nowrap">
                           IN{idx + 1} (Relay CH {idx + 1})
                         </td>
-                        <td className="py-2.5 px-3">
-                          <span className={`px-2 py-0.5 rounded font-mono font-bold border ${pal.bg} ${pal.textCls}`}>
+                        <td className="py-2.5 px-3.5 whitespace-nowrap">
+                          <span className={`inline-block px-2.5 py-0.5 rounded-md font-mono font-bold border ${pal.bg} ${pal.textCls} whitespace-nowrap`}>
                             GPIO {light.pin} (D{light.pin})
                           </span>
                         </td>
-                        <td className="py-2.5 px-3">
+                        <td className="py-2.5 px-3.5 whitespace-nowrap">
                           <span className="inline-flex items-center gap-1.5">
-                            <span className={`w-2.5 h-2.5 rounded-full ${pal.dot}`}></span>
-                            <span>{pal.name}</span>
+                            <span className={`w-2.5 h-2.5 rounded-full ${pal.dot} shrink-0`}></span>
+                            <span className="font-medium text-slate-700">{pal.name}</span>
                           </span>
                         </td>
-                        <td className="py-2.5 px-3 text-emerald-800 font-medium">
-                          ID: <code className="font-mono text-[10px] bg-slate-100 px-1 py-0.5 rounded">{light.id}</code>
+                        <td className="py-2.5 px-3.5 text-emerald-800 font-medium whitespace-nowrap">
+                          ID: <code className="font-mono text-[10px] bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200">{light.id}</code>
                         </td>
                       </tr>
                     );
                   })}
 
-                  {/* Relay VCC */}
+                  {/* Relay VCC & GND */}
                   <tr className="hover:bg-slate-50 transition">
-                    <td className="py-2 px-3 font-semibold text-slate-700">Relay Power</td>
-                    <td className="py-2 px-3 font-mono">VCC &amp; GND</td>
-                    <td className="py-2 px-3 font-mono font-bold text-rose-700">VIN (5V) &amp; GND</td>
-                    <td className="py-2 px-3">Merah &amp; Hitam</td>
-                    <td className="py-2 px-3 text-slate-500">Koil relay membutuhkan daya 5V dari pin VIN</td>
+                    <td className="py-2.5 px-3.5 font-semibold text-slate-700 whitespace-nowrap">Relay (Power)</td>
+                    <td className="py-2.5 px-3.5 font-mono text-slate-700 whitespace-nowrap">VCC &amp; GND</td>
+                    <td className="py-2.5 px-3.5 whitespace-nowrap font-mono font-bold text-rose-700">
+                      <span className="inline-block px-2.5 py-0.5 rounded-md bg-rose-50 border border-rose-200 text-rose-700 font-mono font-bold whitespace-nowrap">
+                        VIN (5V) &amp; GND
+                      </span>
+                    </td>
+                    <td className="py-2.5 px-3.5 whitespace-nowrap text-slate-700">Merah &amp; Abu-abu</td>
+                    <td className="py-2.5 px-3.5 text-slate-500">Koil relay membutuhkan daya 5V dari pin VIN ESP32</td>
                   </tr>
                 </tbody>
               </table>
@@ -786,14 +864,16 @@ export default function WiringSchematicModal({
         </div>
 
         {/* Modal Footer */}
-        <div className="p-3.5 sm:p-4 border-t border-slate-100 flex items-center justify-between shrink-0 bg-slate-50/60">
+        <div className="p-3.5 sm:p-4 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shrink-0 bg-slate-50/60">
           <span className="text-[11px] text-slate-500 flex items-center gap-1.5">
-            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-            <span>Tersinkronisasi otomatis dengan tabel database <code>configured_lights</code>.</span>
+            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+            <span>
+              Tersinkronisasi otomatis dengan tabel database <code className="bg-slate-100 px-1 py-0.5 rounded text-slate-700 font-mono text-[10px]">configured_lights</code>.
+            </span>
           </span>
           <button
             onClick={onClose}
-            className="px-5 py-2 rounded-xl text-xs font-bold text-white bg-slate-900 hover:bg-slate-800 transition active:scale-95 shadow-xs"
+            className="px-5 py-2 rounded-xl text-xs font-bold text-white bg-slate-900 hover:bg-slate-800 transition active:scale-95 shadow-xs whitespace-nowrap self-end sm:self-auto cursor-pointer"
           >
             Tutup Skema
           </button>
