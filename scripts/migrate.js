@@ -1,5 +1,5 @@
 // ==============================================================================
-// SMART HOME IoT — DATABASE MIGRATION SCRIPT (HOSTINGER MYSQL)
+// SMART HOME IoT — DATABASE MIGRATION SCRIPT (DATABASE)
 // ==============================================================================
 
 const mysql = require('mysql2/promise');
@@ -31,11 +31,11 @@ const dbConfig = {
 };
 
 async function migrate() {
-  console.log(`Menghubungkan ke MySQL Hostinger di ${dbConfig.host}:${dbConfig.port}...`);
+  console.log(`Menghubungkan ke Database di ${dbConfig.host}:${dbConfig.port}...`);
   let connection;
   try {
     connection = await mysql.createConnection(dbConfig);
-    console.log('Berhasil terhubung ke database Hostinger MySQL!');
+    console.log('Berhasil terhubung ke Database!');
 
     const tableQueries = [
       {

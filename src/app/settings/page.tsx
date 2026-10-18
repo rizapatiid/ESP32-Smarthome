@@ -130,7 +130,7 @@ export default function SettingsPage() {
           Pengaturan Sistem
         </h1>
         <p className="text-sm text-slate-500 mt-0.5">
-          Konfigurasi mode operasi, interval telemetri, dan informasi koneksi MySQL Hostinger
+          Konfigurasi mode operasi, interval telemetri, dan informasi koneksi Database
         </p>
       </div>
 
@@ -301,12 +301,12 @@ export default function SettingsPage() {
         </div>
       </form>
 
-      {/* 3. Informasi Koneksi Database Hostinger (Masked) */}
+      {/* 3. Informasi Koneksi Database (Masked) */}
       <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2 text-slate-900 font-bold text-base">
             <Database className="w-5 h-5 text-blue-600" />
-            <span>Koneksi Database MySQL (Hostinger)</span>
+            <span>Koneksi Database</span>
           </div>
 
           <button
@@ -340,7 +340,7 @@ export default function SettingsPage() {
             {dbTestResult.ok ? (
               <>
                 <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                <span>Koneksi ke Hostinger MySQL berhasil! Latency respons: {dbTestResult.latencyMs} ms.</span>
+                <span>Koneksi ke Database berhasil! Latency respons: {dbTestResult.latencyMs} ms.</span>
               </>
             ) : (
               <>

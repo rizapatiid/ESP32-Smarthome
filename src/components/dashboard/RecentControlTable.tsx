@@ -21,7 +21,7 @@ export default function RecentControlTable({ logs }: Props) {
               Aktivitas Kontrol Terkini
             </h3>
             <p className="text-xs text-slate-500 font-medium">
-              Audit log perintah yang terkonfirmasi di Hostinger MySQL
+              Audit log perintah yang terkonfirmasi di Database
             </p>
           </div>
         </div>

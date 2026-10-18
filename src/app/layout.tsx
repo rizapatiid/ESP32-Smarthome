@@ -16,7 +16,7 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "SmartHome IoT — Sistem Monitoring & Kontrol ESP32",
   description:
-    "Sistem Monitoring dan Kontrol Perangkat Rumah Berbasis Website Menggunakan ESP32, Wi-Fi Lokal, dan Hostinger MySQL",
+    "Sistem Monitoring dan Kontrol Perangkat Rumah Berbasis Website Menggunakan ESP32, Wi-Fi Lokal, dan Database",
 };
 
 export default function RootLayout({
@@ -34,13 +34,13 @@ export default function RootLayout({
         <main className="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-1">
           {children}
         </main>
-        <footer className="border-t border-slate-200 bg-white py-5 text-center text-xs text-slate-500">
-          <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
-            <span>
-              <strong>SmartHome IoT</strong> — ESP32 Wi-Fi & MySQL Hostinger
+        <footer className="border-t border-slate-200/80 bg-white py-4 text-xs text-slate-400">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-2">
+            <span className="text-slate-500">
+              &copy; {new Date().getFullYear()} <strong className="text-slate-700 font-semibold">SmartHome IoT</strong>. All rights reserved.
             </span>
             <span>
-              Auto Device Discovery • DHT22 • BH1750 • Next.js App Router
+              Sistem Monitoring &amp; Kontrol Cerdas
             </span>
           </div>
         </footer>

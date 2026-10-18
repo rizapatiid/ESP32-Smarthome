@@ -179,7 +179,7 @@ export default function SensorHistoryPage() {
             </span>
           </div>
           <p className="text-xs sm:text-sm text-slate-500 mt-1">
-            Data telemetri otomatis disesuaikan dengan mode sistem yang aktif dan tersimpan permanen di Hostinger MySQL
+            Data telemetri otomatis disesuaikan dengan mode sistem yang aktif dan tersimpan permanen di Database
           </p>
         </div>
 

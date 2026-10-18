@@ -97,7 +97,7 @@ export default function ControlHistoryPage() {
             </span>
           </div>
           <p className="text-xs sm:text-sm text-slate-500 mt-1">
-            Audit log perintah kendali lampu otomatis disesuaikan dengan mode sistem di Hostinger MySQL
+            Audit log perintah kendali lampu otomatis disesuaikan dengan mode sistem di Database
           </p>
         </div>
 

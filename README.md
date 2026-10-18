@@ -1,6 +1,6 @@
 # SmartHome IoT — Sistem Monitoring dan Kontrol Perangkat Rumah Berbasis Website Menggunakan ESP32 dan Wi-Fi Lokal
 
-Aplikasi web modern untuk pemantauan kondisi lingkungan ruangan (suhu, kelembapan, intensitas cahaya) dan kontrol aktuator (LED simulasi lampu) menggunakan mikrokontroler **ESP32** melalui jaringan **Wi-Fi lokal**, dengan persistensi data telemetri dan log kontrol ke database eksternal **Hostinger MySQL**.
+Aplikasi web modern untuk pemantauan kondisi lingkungan ruangan (suhu, kelembapan, intensitas cahaya) dan kontrol aktuator (LED simulasi lampu) menggunakan mikrokontroler **ESP32** melalui jaringan **Wi-Fi lokal**, dengan persistensi data telemetri dan log kontrol ke **Database**.
 
 ---
 
@@ -13,7 +13,7 @@ Aplikasi web modern untuk pemantauan kondisi lingkungan ruangan (suhu, kelembapa
 2. **Dual Mode (Simulasi vs Perangkat Riil)**:
    - **Mode Simulasi**: Berjalan penuh langsung di browser tanpa perangkat fisik (cocok untuk pengujian antarmuka dan demo awal).
    - **Mode Real Hardware**: Terhubung langsung ke REST API ESP32 fisik di jaringan lokal. Data kegagalan ditandai dengan jujur (tidak memalsukan data riil).
-3. **Database MySQL Eksternal (Hostinger)**:
+3. **Database Eksternal**:
    - Penyimpanan riwayat telemetri time-series (`sensor_readings`) dan log perintah kontrol (`control_logs`).
    - Dilengkapi pengukuran latency koneksi database real-time dan proteksi kredensial.
 4. **Desain Antarmuka Minimalis & Modern**:
@@ -28,7 +28,7 @@ Aplikasi web modern untuk pemantauan kondisi lingkungan ruangan (suhu, kelembapa
 - **Frontend & Backend**: Next.js (App Router), React, TypeScript
 - **Styling**: Tailwind CSS
 - **Visualisasi Grafik**: Recharts
-- **Database**: MySQL eksternal (Hostinger Cloud)
+- **Database**: Database eksternal
 - **Komunikasi Hardware**: HTTP REST API (Wi-Fi lokal)
 - **Discovery Service**: Node.js UDP Broadcast Socket (`dgram`)
 - **Firmware**: Arduino IDE / ESP32 Arduino Core
@@ -51,12 +51,12 @@ smarthome/
 ├── public/                      # Asset statis
 ├── scripts/
 │   ├── discovery-daemon.js      # Background daemon UDP discovery
-│   └── migrate.js               # Script migrasi tabel ke MySQL Hostinger
+│   └── migrate.js               # Script migrasi tabel ke Database
 ├── src/
 │   ├── app/
 │   │   ├── api/
 │   │   │   ├── control/         # Endpoint kontrol lampu & riwayat
-│   │   │   ├── db/status/       # Uji koneksi MySQL Hostinger
+│   │   │   ├── db/status/       # Uji koneksi Database
 │   │   │   ├── devices/         # Manajemen & koneksi perangkat
 │   │   │   ├── discovery/scan/  # Trigger scan UDP broadcast
 │   │   │   ├── sensors/         # Telemetri live & riwayat sensor
@@ -74,7 +74,7 @@ smarthome/
 │   │   ├── dashboard/           # Komponen kartu metrik, kontrol, grafik
 │   │   └── layout/              # Navbar responsif & status badges
 │   ├── lib/
-│   │   ├── database/mysql.ts    # Pool koneksi MySQL Hostinger
+│   │   ├── database/mysql.ts    # Pool koneksi Database
 │   │   ├── esp32/
 │   │   │   ├── client.ts        # HTTP client dengan proteksi SSRF
 │   │   │   └── discovery.ts     # Layanan broadcast UDP
@@ -83,7 +83,7 @@ smarthome/
 │   └── types/
 │       └── iot.ts               # Definisi antarmuka TypeScript
 ├── .env.example                 # Template environment variables
-├── .env.local                   # Kredensial lokal (termasuk Hostinger DB)
+├── .env.local                   # Kredensial lokal database
 ├── package.json
 └── README.md
 ```
@@ -103,7 +103,7 @@ npm install
 ```
 
 ### 3. Konfigurasi Environment Variable
-File `.env.local` telah dikonfigurasikan dengan kredensial Hostinger MySQL Anda:
+File `.env.local` telah dikonfigurasikan dengan kredensial Database Anda:
 ```env
 DATABASE_URL="mysql://u500072377_smarthome:Smarthm1234@srv1412.hstgr.io:3306/u500072377_smarthome"
 DB_HOST="srv1412.hstgr.io"
@@ -116,7 +116,7 @@ DISCOVERY_UDP_PORT="8266"
 ```
 
 ### 4. Eksekusi Migrasi Tabel Database
-Jalankan migrasi skema tabel ke MySQL Hostinger:
+Jalankan migrasi skema tabel ke Database:
 ```bash
 npm run migrate
 ```
@@ -137,7 +137,7 @@ Buka browser dan akses: **[http://localhost:3000](http://localhost:3000)**.
 2. Perhatikan banner mode menampilkan **MODE SIMULASI**.
 3. Kartu Suhu, Kelembapan, dan Intensitas Cahaya akan berfluktuasi secara otomatis setiap 2 detik.
 4. Klik tombol **Nyalakan Lampu (ON)** / **Matikan Lampu (OFF)**. Perhatikan status lampu berubah dan log kontrol tercatat di tabel riwayat.
-5. Kunjungi halaman **Riwayat Sensor** dan **Riwayat Kontrol** untuk memeriksa data yang tersimpan di MySQL Hostinger.
+5. Kunjungi halaman **Riwayat Sensor** dan **Riwayat Kontrol** untuk memeriksa data yang tersimpan di Database.
 
 ### B. Pengujian Mode Real Hardware (Dengan ESP32 Fisik)
 1. **Rangkaian Hardware**:
@@ -171,7 +171,7 @@ Buka browser dan akses: **[http://localhost:3000](http://localhost:3000)**.
 ## 🎓 Demonstrasi untuk Tugas Kuliah
 
 Saat mempresentasikan proyek ini:
-1. Tunjukkan arsitektur modular yang rapi (Next.js App Router + Node.js Backend + MySQL Hostinger + ESP32).
+1. Tunjukkan arsitektur modular yang rapi (Next.js App Router + Node.js Backend + Database + ESP32).
 2. Tunjukkan keunggulan **Auto Device Discovery**: perangkat baru langsung muncul di tabel tanpa konfigurasi manual IP statis.
 3. Tunjukkan transparansi data: mode simulasi diberi tanda jelas terpisah dari mode real sensor DHT22/BH1750.
-4. Tunjukkan tabel dan grafik historis di halaman Riwayat yang tersimpan langsung di database cloud Hostinger.
+4. Tunjukkan tabel dan grafik historis di halaman Riwayat yang tersimpan langsung di Database.

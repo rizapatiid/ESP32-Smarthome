@@ -183,7 +183,7 @@ export default function DevicesPage() {
           </div>
           <h3 className="font-bold text-slate-900 text-base">Memindai Jaringan Wi-Fi Lokal</h3>
           <p className="text-xs text-slate-500 max-w-md mx-auto">
-            Backend menyebarkan paket UDP broadcast ke port 8266. ESP32 yang merespons akan diidentifikasi secara otomatis ke Hostinger MySQL.
+            Backend menyebarkan paket UDP broadcast ke port 8266. ESP32 yang merespons akan diidentifikasi secara otomatis ke Database.
           </p>
         </div>
       )}

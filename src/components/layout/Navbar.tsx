@@ -103,7 +103,7 @@ export default function Navbar() {
                   </span>
                 </div>
                 <span className="text-[11px] text-slate-500 -mt-0.5 font-medium">
-                  ESP32 • Wi-Fi • Hostinger MySQL
+                  ESP32 • Wi-Fi • Database
                 </span>
               </div>
             </Link>
@@ -165,7 +165,7 @@ export default function Navbar() {
                   ? "bg-white text-slate-700 border-slate-200 shadow-sm"
                   : "bg-rose-50 text-rose-700 border-rose-200"
               }`}
-              title="Koneksi Database MySQL Hostinger"
+              title="Koneksi Database"
             >
               <Database
                 className={`w-3.5 h-3.5 ${
@@ -173,7 +173,7 @@ export default function Navbar() {
                 }`}
               />
               <span className="font-mono text-[11px]">
-                {dbStatus === "CONNECTED" ? `MySQL ${dbLatency ? `${dbLatency}ms` : "OK"}` : "MySQL Offline"}
+                {dbStatus === "CONNECTED" ? `Database ${dbLatency ? `${dbLatency}ms` : "OK"}` : "Database Offline"}
               </span>
             </div>
           </div>
@@ -228,7 +228,7 @@ export default function Navbar() {
           <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500 px-1">
             <span className="flex items-center gap-1.5">
               <Database className="w-3.5 h-3.5 text-blue-600" />
-              MySQL: {dbStatus}
+              Database: {dbStatus}
             </span>
             <button
               onClick={handleToggleMode}
