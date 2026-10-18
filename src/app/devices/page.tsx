@@ -24,8 +24,10 @@ import {
   AlertTriangle,
   ChevronDown,
   ChevronUp,
+  Layers,
 } from "lucide-react";
 import { DeviceInfo } from "@/types/iot";
+import WiringSchematicModal from "@/components/devices/WiringSchematicModal";
 
 export default function DevicesPage() {
   const [devices, setDevices] = useState<Array<DeviceInfo & { isActive?: boolean }>>([]);
@@ -53,6 +55,7 @@ export default function DevicesPage() {
   // Panduan Setup State
   const [isGuideOpen, setIsGuideOpen] = useState(true);
   const [activeGuideTab, setActiveGuideTab] = useState<"step1" | "step2" | "step3" | "troubleshooting">("step1");
+  const [isSchematicModalOpen, setIsSchematicModalOpen] = useState(false);
 
   // Fetch daftar perangkat dari MySQL
   const loadDevices = useCallback(async () => {
@@ -463,7 +466,14 @@ export default function DevicesPage() {
             </div>
           </div>
 
-          <div className="flex items-center gap-2 justify-between sm:justify-end">
+          <div className="flex items-center gap-2 justify-between sm:justify-end flex-wrap">
+            <button
+              onClick={() => setIsSchematicModalOpen(true)}
+              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold text-blue-700 bg-blue-50 hover:bg-blue-100 border border-blue-200 transition active:scale-95 shadow-2xs"
+            >
+              <Layers className="w-3.5 h-3.5 text-blue-600" />
+              <span>Skema Perakitan</span>
+            </button>
             <span className="text-[10px] font-mono font-semibold px-2.5 py-1 rounded-full bg-slate-100 text-slate-600 border border-slate-200">
               UDP: 8266 · HTTP: 80
             </span>
@@ -567,6 +577,15 @@ export default function DevicesPage() {
                     </span>
                   </div>
                 </div>
+
+                {/* Tombol Buka Skema Perakitan Visual */}
+                <button
+                  onClick={() => setIsSchematicModalOpen(true)}
+                  className="w-full mt-2 inline-flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-xs transition active:scale-95"
+                >
+                  <Layers className="w-3.5 h-3.5 text-blue-200" />
+                  <span>Lihat Diagram Skema Lengkap</span>
+                </button>
               </div>
 
               {/* Langkah 2: Upload Firmware Arduino IDE */}
@@ -864,6 +883,12 @@ export default function DevicesPage() {
           </div>
         </div>
       )}
+
+      {/* Modal Skema Perakitan Visual */}
+      <WiringSchematicModal
+        isOpen={isSchematicModalOpen}
+        onClose={() => setIsSchematicModalOpen(false)}
+      />
     </div>
   );
 }
