@@ -158,29 +158,35 @@ export default function SensorHistoryPage() {
     <div className="space-y-6">
       {/* Header Halaman */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-white p-4 sm:p-5 rounded-2xl border border-slate-200/80 shadow-[0_1px_3px_rgba(0,0,0,0.03)]">
-        <div>
-          <div className="flex flex-wrap items-center gap-2">
-            <h1 className="text-lg sm:text-2xl font-bold text-slate-900 tracking-tight">
-              Riwayat Pembacaan Sensor
-            </h1>
-            <span
-              className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold border shrink-0 whitespace-nowrap ${
-                systemMode === "real"
-                  ? "bg-emerald-50 text-emerald-800 border-emerald-200"
-                  : "bg-amber-50 text-amber-800 border-amber-200"
-              }`}
-            >
-              <span
-                className={`w-1.5 h-1.5 rounded-full ${
-                  systemMode === "real" ? "bg-emerald-500 animate-pulse" : "bg-amber-500"
-                }`}
-              />
-              {systemMode === "real" ? "Mode Real" : "Mode Simulasi"}
-            </span>
+        <div className="flex items-center gap-3.5">
+          <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-blue-50 border border-blue-200/80 text-blue-600 flex items-center justify-center shrink-0 shadow-2xs">
+            <Activity className="w-5 h-5 stroke-[2.2]" />
           </div>
-          <p className="text-xs text-slate-500 mt-1">
-            Data telemetri tersimpan otomatis sesuai mode sistem yang aktif
-          </p>
+
+          <div className="min-w-0">
+            <div className="flex items-center gap-2">
+              <h1 className="text-base sm:text-xl font-bold text-slate-900 tracking-tight">
+                Riwayat Sensor
+              </h1>
+              <span
+                className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold border shrink-0 ${
+                  systemMode === "real"
+                    ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                    : "bg-amber-50 text-amber-700 border-amber-200"
+                }`}
+              >
+                <span
+                  className={`w-1.5 h-1.5 rounded-full ${
+                    systemMode === "real" ? "bg-emerald-500 animate-pulse" : "bg-amber-500"
+                  }`}
+                />
+                {systemMode === "real" ? "Real" : "Simulasi"}
+              </span>
+            </div>
+            <p className="text-xs text-slate-500 mt-0.5 truncate">
+              Arsip data telemetri yang tersimpan di Database
+            </p>
+          </div>
         </div>
 
         <div className="grid grid-cols-2 gap-2 w-full sm:w-auto sm:flex sm:items-center pt-1 sm:pt-0">
@@ -267,21 +273,34 @@ export default function SensorHistoryPage() {
         </div>
       </div>
 
-      {/* Filter Toolbar (3 Kolom Bersih Tanpa Dropdown Jenis Data Manual) */}
-      <div className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-[0_1px_3px_rgba(0,0,0,0.03)] space-y-3">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1.5 sm:gap-3">
-          <div className="flex items-center gap-2 text-xs font-bold text-slate-700">
+      {/* Filter Toolbar (Kompak & Rapi) */}
+      <div className="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200/80 shadow-[0_1px_3px_rgba(0,0,0,0.03)] space-y-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2 text-xs font-bold text-slate-800">
             <Filter className="w-3.5 h-3.5 text-blue-600 shrink-0" />
-            <span>Filter Kueri Riwayat</span>
+            <span>Filter Kueri Data</span>
           </div>
-          <span className="text-[11px] font-medium text-slate-500">
-            Mode Aktif: <strong className="text-slate-800">{systemMode === "real" ? "Real (ESP32)" : "Simulasi"}</strong>
-          </span>
+
+          {(deviceId || startDate || endDate) ? (
+            <button
+              onClick={() => {
+                setDeviceId("");
+                setStartDate("");
+                setEndDate("");
+                setPage(1);
+              }}
+              className="text-xs font-semibold text-blue-600 hover:text-blue-700 hover:underline"
+            >
+              Reset Filter
+            </button>
+          ) : (
+            <span className="text-[11px] text-slate-400 font-medium">Semua data</span>
+          )}
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-xs">
           <div>
-            <label className="block text-slate-500 font-semibold mb-1">ID Perangkat</label>
+            <label className="block text-slate-500 font-semibold text-[11px] mb-1">ID Perangkat</label>
             <input
               type="text"
               placeholder="Semua Perangkat"
@@ -290,34 +309,36 @@ export default function SensorHistoryPage() {
                 setDeviceId(e.target.value);
                 setPage(1);
               }}
-              className="w-full px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono text-xs"
+              className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-slate-50/50 hover:bg-white focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono text-xs transition"
             />
           </div>
 
-          <div>
-            <label className="block text-slate-500 font-semibold mb-1">Tanggal Mulai</label>
-            <input
-              type="date"
-              value={startDate}
-              onChange={(e) => {
-                setStartDate(e.target.value);
-                setPage(1);
-              }}
-              className="w-full px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs"
-            />
-          </div>
+          <div className="grid grid-cols-2 gap-2 sm:col-span-2">
+            <div>
+              <label className="block text-slate-500 font-semibold text-[11px] mb-1">Tanggal Mulai</label>
+              <input
+                type="date"
+                value={startDate}
+                onChange={(e) => {
+                  setStartDate(e.target.value);
+                  setPage(1);
+                }}
+                className="w-full px-2.5 sm:px-3 py-2 rounded-xl border border-slate-200 bg-slate-50/50 hover:bg-white focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs transition"
+              />
+            </div>
 
-          <div>
-            <label className="block text-slate-500 font-semibold mb-1">Tanggal Selesai</label>
-            <input
-              type="date"
-              value={endDate}
-              onChange={(e) => {
-                setEndDate(e.target.value);
-                setPage(1);
-              }}
-              className="w-full px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs"
-            />
+            <div>
+              <label className="block text-slate-500 font-semibold text-[11px] mb-1">Tanggal Selesai</label>
+              <input
+                type="date"
+                value={endDate}
+                onChange={(e) => {
+                  setEndDate(e.target.value);
+                  setPage(1);
+                }}
+                className="w-full px-2.5 sm:px-3 py-2 rounded-xl border border-slate-200 bg-slate-50/50 hover:bg-white focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs transition"
+              />
+            </div>
           </div>
         </div>
       </div>
