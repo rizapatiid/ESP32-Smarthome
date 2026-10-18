@@ -3,7 +3,7 @@
 // ==============================================================================
 
 import mysql, { Pool, RowDataPacket, ResultSetHeader } from "mysql2/promise";
-import { DeviceInfo, SensorData, ControlLogItem } from "@/types/iot";
+import { DeviceInfo, SensorData, ControlLogItem, SmartLight } from "@/types/iot";
 
 let pool: Pool | null = null;
 
@@ -511,4 +511,128 @@ export async function setSystemSetting(key: string, value: string): Promise<void
   `,
     [key, value]
   );
+}
+
+/**
+ * ==============================================================================
+ * OPERASI TABEL KHUSUS: configured_lights (MySQL Hostinger)
+ * ==============================================================================
+ */
+
+/**
+ * Ambil semua lampu terkonfigurasi langsung dari tabel configured_lights
+ */
+export async function getAllConfiguredLights(): Promise<SmartLight[]> {
+  try {
+    const db = getDatabasePool();
+    const [rows] = await db.query<RowDataPacket[]>(
+      "SELECT id, name, pin, state, is_default FROM configured_lights ORDER BY is_default DESC, created_at ASC"
+    );
+
+    if (rows.length > 0) {
+      return rows.map((r) => ({
+        id: String(r.id),
+        name: String(r.name),
+        pin: Number(r.pin),
+        state: Boolean(r.state),
+        isDefault: Boolean(r.is_default),
+      }));
+    }
+
+    // Fallback default
+    return [
+      { id: "lamp-main", name: "Lampu Utama", pin: 2, state: false, isDefault: true },
+    ];
+  } catch (err) {
+    console.warn("Gagal membaca tabel configured_lights:", err);
+    return [
+      { id: "lamp-main", name: "Lampu Utama", pin: 2, state: false, isDefault: true },
+    ];
+  }
+}
+
+/**
+ * Tambah lampu baru ke tabel configured_lights di MySQL
+ */
+export async function insertConfiguredLight(light: SmartLight): Promise<boolean> {
+  try {
+    const db = getDatabasePool();
+    await db.query(
+      `
+      INSERT INTO configured_lights (id, name, pin, state, is_default)
+      VALUES (?, ?, ?, ?, ?)
+      ON DUPLICATE KEY UPDATE
+        name = VALUES(name),
+        pin = VALUES(pin),
+        state = VALUES(state),
+        updated_at = NOW()
+    `,
+      [light.id, light.name, light.pin, light.state ? 1 : 0, light.isDefault ? 1 : 0]
+    );
+    return true;
+  } catch (err) {
+    console.error("Gagal insert ke configured_lights:", err);
+    return false;
+  }
+}
+
+/**
+ * Update nama lampu di tabel configured_lights
+ */
+export async function updateConfiguredLightName(id: string, name: string): Promise<boolean> {
+  try {
+    const db = getDatabasePool();
+    await db.query(
+      "UPDATE configured_lights SET name = ?, updated_at = NOW() WHERE id = ?",
+      [name, id]
+    );
+    return true;
+  } catch (err) {
+    console.error("Gagal update nama lampu di configured_lights:", err);
+    return false;
+  }
+}
+
+/**
+ * Hapus lampu dari tabel configured_lights (kecuali lampu default)
+ */
+export async function deleteConfiguredLight(id: string): Promise<boolean> {
+  try {
+    const db = getDatabasePool();
+    await db.query(
+      "DELETE FROM configured_lights WHERE id = ? AND is_default = FALSE",
+      [id]
+    );
+    return true;
+  } catch (err) {
+    console.error("Gagal delete dari configured_lights:", err);
+    return false;
+  }
+}
+
+/**
+ * Perbarui status ON/OFF lampu di tabel configured_lights
+ */
+export async function updateConfiguredLightState(
+  identifier: { lightId?: string; pin?: number },
+  state: boolean
+): Promise<boolean> {
+  try {
+    const db = getDatabasePool();
+    if (identifier.lightId) {
+      await db.query(
+        "UPDATE configured_lights SET state = ?, updated_at = NOW() WHERE id = ?",
+        [state ? 1 : 0, identifier.lightId]
+      );
+    } else if (typeof identifier.pin === "number") {
+      await db.query(
+        "UPDATE configured_lights SET state = ?, updated_at = NOW() WHERE pin = ?",
+        [state ? 1 : 0, identifier.pin]
+      );
+    }
+    return true;
+  } catch (err) {
+    console.error("Gagal update status di configured_lights:", err);
+    return false;
+  }
 }

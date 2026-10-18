@@ -6,6 +6,7 @@ import {
   saveDeviceState,
   getDeviceState,
   logControlCommand,
+  updateConfiguredLightState,
 } from "@/lib/database/mysql";
 import {
   getSimulatedLampState,
@@ -158,30 +159,11 @@ export async function POST(req: Request) {
         isSimulated: false,
       });
 
-      // Sinkronkan state lampu ke configured_lights di database MySQL
+      // Sinkronkan state lampu ke tabel configured_lights di database MySQL
       try {
-        const rawLights = await getSystemSetting("configured_lights", "");
-        if (rawLights) {
-          const parsed: SmartLight[] = JSON.parse(rawLights);
-          if (Array.isArray(parsed) && parsed.length > 0) {
-            let hasUpdated = false;
-            const updated = parsed.map((l) => {
-              const isMatch = body.lightId
-                ? l.id === body.lightId
-                : l.pin === pin || (l.isDefault && pin === 2);
-              if (isMatch) {
-                hasUpdated = true;
-                return { ...l, state: confirmed };
-              }
-              return l;
-            });
-            if (hasUpdated) {
-              await setSystemSetting("configured_lights", JSON.stringify(updated));
-            }
-          }
-        }
+        await updateConfiguredLightState({ lightId: body.lightId, pin }, confirmed);
       } catch (e) {
-        console.warn("Gagal sinkronkan status lampu ke configured_lights:", e);
+        console.warn("Gagal update state ke tabel configured_lights:", e);
       }
 
       return NextResponse.json({
@@ -209,30 +191,11 @@ export async function POST(req: Request) {
       isSimulated: true,
     });
 
-    // Sinkronkan state lampu ke configured_lights di database MySQL
+    // Sinkronkan state lampu ke tabel configured_lights di database MySQL
     try {
-      const rawLights = await getSystemSetting("configured_lights", "");
-      if (rawLights) {
-        const parsed: SmartLight[] = JSON.parse(rawLights);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          let hasUpdated = false;
-          const updated = parsed.map((l) => {
-            const isMatch = body.lightId
-              ? l.id === body.lightId
-              : l.pin === pin || (l.isDefault && pin === 2);
-            if (isMatch) {
-              hasUpdated = true;
-              return { ...l, state: targetState };
-            }
-            return l;
-          });
-          if (hasUpdated) {
-            await setSystemSetting("configured_lights", JSON.stringify(updated));
-          }
-        }
-      }
+      await updateConfiguredLightState({ lightId: body.lightId, pin }, targetState);
     } catch (e) {
-      console.warn("Gagal sinkronkan status lampu ke configured_lights:", e);
+      console.warn("Gagal update state ke tabel configured_lights:", e);
     }
 
     return NextResponse.json({

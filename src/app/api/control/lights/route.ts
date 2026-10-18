@@ -1,40 +1,24 @@
 import { NextResponse } from "next/server";
-import { getSystemSetting, setSystemSetting } from "@/lib/database/mysql";
+import {
+  getAllConfiguredLights,
+  insertConfiguredLight,
+  updateConfiguredLightName,
+  deleteConfiguredLight,
+  setSystemSetting,
+  getSystemSetting,
+} from "@/lib/database/mysql";
 import { getSimulatedLampState } from "@/lib/simulation/simulator";
 import { SmartLight } from "@/types/iot";
 
 export const dynamic = "force-dynamic";
 
-const DEFAULT_LIGHTS: SmartLight[] = [
-  {
-    id: "lamp-main",
-    name: "Lampu Utama",
-    pin: 2,
-    state: false,
-    isDefault: true,
-  },
-];
-
 /**
- * GET /api/control/lights — Ambil daftar semua lampu yang terdaftar
+ * GET /api/control/lights — Ambil daftar semua lampu dari tabel configured_lights di MySQL
  */
 export async function GET() {
   try {
-    const raw = await getSystemSetting("configured_lights", "");
     const mode = await getSystemSetting("iot_mode", process.env.IOT_MODE || "simulation");
-
-    let lights: SmartLight[] = DEFAULT_LIGHTS;
-
-    if (raw) {
-      try {
-        const parsed: SmartLight[] = JSON.parse(raw);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          lights = parsed;
-        }
-      } catch {
-        // Fallback jika JSON rusak
-      }
-    }
+    let lights = await getAllConfiguredLights();
 
     // Jika mode simulasi, sinkronkan status pin terkini dari simulator engine
     if (mode === "simulation") {
@@ -52,26 +36,12 @@ export async function GET() {
 }
 
 /**
- * POST /api/control/lights — Tambah, Edit Nama, atau Hapus lampu
+ * POST /api/control/lights — Tambah, Edit Nama, atau Hapus lampu langsung di tabel configured_lights MySQL
  */
 export async function POST(req: Request) {
   try {
     const body = await req.json();
     const action = body.action as "add" | "rename" | "delete" | "update_all";
-
-    // Ambil list lampu saat ini
-    let lights: SmartLight[] = DEFAULT_LIGHTS;
-    const raw = await getSystemSetting("configured_lights", "");
-    if (raw) {
-      try {
-        const parsed = JSON.parse(raw);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          lights = parsed;
-        }
-      } catch {
-        // Abaikan parse error, gunakan default
-      }
-    }
 
     if (action === "add") {
       const name = String(body.name || "").trim() || "Lampu Baru";
@@ -86,7 +56,7 @@ export async function POST(req: Request) {
         isDefault: false,
       };
 
-      lights.push(newLight);
+      await insertConfiguredLight(newLight);
     } else if (action === "rename") {
       const id = String(body.id || "");
       const newName = String(body.name || "").trim();
@@ -96,34 +66,27 @@ export async function POST(req: Request) {
           { status: 400 }
         );
       }
-
-      lights = lights.map((l) => (l.id === id ? { ...l, name: newName } : l));
+      await updateConfiguredLightName(id, newName);
     } else if (action === "delete") {
       const id = String(body.id || "");
       if (!id) {
         return NextResponse.json({ success: false, error: "ID lampu wajib diisi" }, { status: 400 });
       }
-
-      // Jangan hapus default light (lamp-main)
-      lights = lights.filter((l) => l.id !== id || l.isDefault);
-    } else if (action === "update_all") {
-      if (Array.isArray(body.lights)) {
-        lights = body.lights;
-      }
-    } else {
-      return NextResponse.json(
-        { success: false, error: "Action tidak dikenali (add / rename / delete / update_all)" },
-        { status: 400 }
-      );
+      await deleteConfiguredLight(id);
     }
 
-    // Simpan ke database
-    await setSystemSetting("configured_lights", JSON.stringify(lights));
+    // Ambil daftar lampu terbaru dari tabel MySQL
+    const updatedLights = await getAllConfiguredLights();
+
+    // Backup ke system_settings juga untuk redundansi
+    try {
+      await setSystemSetting("configured_lights", JSON.stringify(updatedLights));
+    } catch {}
 
     return NextResponse.json({
       success: true,
-      lights,
-      message: "Konfigurasi lampu berhasil diperbarui",
+      lights: updatedLights,
+      message: "Konfigurasi lampu berhasil diperbarui di database",
     });
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : String(err);
