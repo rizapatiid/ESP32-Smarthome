@@ -12,6 +12,10 @@ import {
   Sparkles,
   ExternalLink,
   CheckCircle2,
+  Moon,
+  Sun,
+  Sunrise,
+  Sunset,
 } from "lucide-react";
 import { SystemStatus } from "@/types/iot";
 
@@ -22,12 +26,14 @@ interface Props {
 
 export default function StatusHeader({ status, lastUpdated }: Props) {
   const [greeting, setGreeting] = useState("Selamat Datang");
+  const [currentHour, setCurrentHour] = useState(20);
   const [currentDateStr, setCurrentDateStr] = useState("");
   const [copiedIp, setCopiedIp] = useState(false);
 
   useEffect(() => {
     const now = new Date();
     const hour = now.getHours();
+    setCurrentHour(hour);
     if (hour < 11) setGreeting("Selamat Pagi");
     else if (hour < 15) setGreeting("Selamat Siang");
     else if (hour < 18) setGreeting("Selamat Sore");
@@ -58,23 +64,30 @@ export default function StatusHeader({ status, lastUpdated }: Props) {
     <div className="space-y-4">
       {/* Hero Welcome Bar */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 bg-white p-4 sm:p-5 rounded-2xl border border-slate-200/80 shadow-[0_1px_3px_rgba(0,0,0,0.03)]">
-        <div>
-          <div className="flex items-center justify-between sm:justify-start gap-2">
-            <h1 className="text-lg sm:text-2xl font-bold text-slate-900 tracking-tight leading-snug">
-              {greeting}, Sistem SmartHome Aktif
-            </h1>
-            <span className="w-2 h-2 rounded-full bg-blue-600 animate-pulse shrink-0" />
+        <div className="flex items-start sm:items-center gap-3">
+          <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-gradient-to-tr from-blue-700 via-blue-600 to-indigo-600 text-white flex items-center justify-center shadow-md shadow-blue-500/20 shrink-0 mt-0.5 sm:mt-0">
+            {currentHour < 11 ? (
+              <Sunrise className="w-5 h-5 text-amber-200" />
+            ) : currentHour < 15 ? (
+              <Sun className="w-5 h-5 text-amber-200" />
+            ) : currentHour < 18 ? (
+              <Sunset className="w-5 h-5 text-orange-200" />
+            ) : (
+              <Moon className="w-5 h-5 text-indigo-100" />
+            )}
           </div>
 
-          <div className="mt-1.5 flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2.5 text-xs text-slate-500">
-            <div className="inline-flex items-center gap-1.5 text-slate-600">
+          <div className="min-w-0">
+            <div className="flex items-center gap-2">
+              <h1 className="text-base sm:text-xl md:text-2xl font-bold text-slate-900 tracking-tight leading-snug">
+                {greeting}, Sistem SmartHome Aktif
+              </h1>
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0 hidden sm:inline-block" title="Sistem Aktif" />
+            </div>
+
+            <div className="mt-0.5 sm:mt-1 flex items-center gap-1.5 text-xs text-slate-500">
               <Clock className="w-3.5 h-3.5 text-slate-400 shrink-0" />
               <span>{currentDateStr || "Memuat kalender..."}</span>
-            </div>
-            <span className="hidden sm:inline text-slate-300">•</span>
-            <div className="inline-flex items-center gap-1.5 text-slate-600 font-medium">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
-              <span>Monitoring ESP32 &amp; Database</span>
             </div>
           </div>
         </div>
