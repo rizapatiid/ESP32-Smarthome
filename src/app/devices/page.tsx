@@ -38,6 +38,11 @@ export default function DevicesPage() {
   const [scanError, setScanError] = useState<string | null>(null);
   const [connectingId, setConnectingId] = useState<string | null>(null);
 
+  // Scan Popup Modal State
+  const [isScanModalOpen, setIsScanModalOpen] = useState(false);
+  const [scanState, setScanState] = useState<"scanning" | "success" | "error">("scanning");
+  const [scanResult, setScanResult] = useState<{ count: number; durationMs: number } | null>(null);
+
   // Firmware Modal State
   const [isFirmwareModalOpen, setIsFirmwareModalOpen] = useState(false);
   const [firmwareCode, setFirmwareCode] = useState("");
@@ -95,10 +100,12 @@ export default function DevicesPage() {
     loadConfiguredLights();
   }, [loadDevices, loadConfiguredLights]);
 
-  // Handler Trigger UDP Scan
+  // Handler Trigger UDP Scan via Modal Popup
   const handleStartScan = async () => {
     if (scanning) return;
     setScanning(true);
+    setIsScanModalOpen(true);
+    setScanState("scanning");
     setScanError(null);
     setScanMessage("Mengirim UDP Broadcast (255.255.255.255:8266) di jaringan Wi-Fi lokal...");
 
@@ -111,14 +118,18 @@ export default function DevicesPage() {
 
       const data = await res.json();
       if (res.ok && data.success) {
+        setScanState("success");
+        setScanResult({ count: data.count ?? 0, durationMs: data.durationMs ?? 3500 });
         setScanMessage(
           `Pencarian selesai dalam ${data.durationMs}ms. Ditemukan ${data.count} perangkat.`
         );
         await loadDevices();
       } else {
+        setScanState("error");
         setScanError(data.error || "Gagal melakukan scan UDP");
       }
     } catch (err: unknown) {
+      setScanState("error");
       setScanError(err instanceof Error ? err.message : "Kesalahan jaringan scan");
     } finally {
       setScanning(false);
@@ -262,34 +273,18 @@ export default function DevicesPage() {
         </div>
       </div>
 
-      {/* Pesan Notifikasi Feedback */}
-      {scanMessage && (
-        <div className="flex items-center gap-2 p-3.5 rounded-xl bg-blue-50/80 border border-blue-200 text-blue-900 text-xs font-medium">
+      {/* Pesan Notifikasi Feedback (Hanya saat popup ditutup) */}
+      {scanMessage && !isScanModalOpen && (
+        <div className="flex items-center gap-2 p-3.5 rounded-xl bg-blue-50/80 border border-blue-200 text-blue-900 text-xs font-medium animate-in fade-in duration-150">
           <CheckCircle2 className="w-4 h-4 shrink-0 text-blue-600" />
           <span>{scanMessage}</span>
         </div>
       )}
 
-      {scanError && (
-        <div className="flex items-center gap-2 p-3.5 rounded-xl bg-rose-50/80 border border-rose-200 text-rose-900 text-xs font-medium">
+      {scanError && !isScanModalOpen && (
+        <div className="flex items-center gap-2 p-3.5 rounded-xl bg-rose-50/80 border border-rose-200 text-rose-900 text-xs font-medium animate-in fade-in duration-150">
           <XCircle className="w-4 h-4 shrink-0 text-rose-600" />
           <span>{scanError}</span>
-        </div>
-      )}
-
-      {/* Animasi Scan Radar Jika Scanning */}
-      {scanning && (
-        <div className="p-8 rounded-2xl bg-white border border-blue-200 text-center space-y-3 shadow-sm">
-          <div className="relative w-16 h-16 mx-auto flex items-center justify-center">
-            <span className="absolute inset-0 rounded-full bg-blue-400/20 animate-ping" />
-            <span className="relative w-12 h-12 rounded-full bg-gradient-to-tr from-blue-700 to-indigo-500 text-white flex items-center justify-center shadow-lg shadow-blue-500/30">
-              <Radio className="w-6 h-6 animate-pulse" />
-            </span>
-          </div>
-          <h3 className="font-bold text-slate-900 text-base">Memindai Jaringan Wi-Fi Lokal</h3>
-          <p className="text-xs text-slate-500 max-w-md mx-auto">
-            Backend menyebarkan paket UDP broadcast ke port 8266. ESP32 yang merespons akan diidentifikasi secara otomatis ke Database.
-          </p>
         </div>
       )}
 
@@ -932,6 +927,110 @@ export default function DevicesPage() {
                 Tutup
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Popup Scan Radar ESP32 */}
+      {isScanModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/70 backdrop-blur-xs animate-in fade-in duration-150">
+          <div className="bg-white rounded-2xl border border-slate-200 shadow-2xl w-full max-w-sm overflow-hidden text-center p-5 sm:p-6 space-y-4 animate-in zoom-in-95 duration-150">
+            {scanState === "scanning" && (
+              <>
+                <div className="relative w-20 h-20 mx-auto flex items-center justify-center">
+                  <span className="absolute inset-0 rounded-full bg-blue-500/20 animate-ping duration-1000" />
+                  <span className="absolute inset-2 rounded-full bg-blue-500/30 animate-pulse" />
+                  <span className="relative w-14 h-14 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-600 text-white flex items-center justify-center shadow-lg shadow-blue-500/40">
+                    <Radio className="w-7 h-7 animate-pulse" />
+                  </span>
+                </div>
+
+                <div className="space-y-1">
+                  <h3 className="font-extrabold text-slate-900 text-base tracking-tight">
+                    Memindai Jaringan Wi-Fi Lokal
+                  </h3>
+                  <p className="text-xs text-slate-500 leading-relaxed max-w-xs mx-auto">
+                    Menyebarkan paket UDP broadcast ke port <strong>8266</strong> untuk mendeteksi ESP32 secara instan.
+                  </p>
+                </div>
+
+                <div className="p-2.5 rounded-xl bg-blue-50/70 border border-blue-200/70 text-[11px] font-mono text-blue-700 flex items-center justify-center gap-2">
+                  <RefreshCw className="w-3.5 h-3.5 animate-spin text-blue-600 shrink-0" />
+                  <span>Mendengarkan respons UDP (~3.5 detik)...</span>
+                </div>
+
+                <button
+                  onClick={() => setIsScanModalOpen(false)}
+                  className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-500 hover:text-slate-700 hover:bg-slate-100 transition cursor-pointer"
+                >
+                  Batal
+                </button>
+              </>
+            )}
+
+            {scanState === "success" && (
+              <>
+                <div className="w-16 h-16 rounded-full bg-emerald-100 text-emerald-600 mx-auto flex items-center justify-center shadow-md shadow-emerald-500/20 animate-in zoom-in-75 duration-200">
+                  <CheckCircle2 className="w-8 h-8" />
+                </div>
+
+                <div className="space-y-1">
+                  <h3 className="font-extrabold text-slate-900 text-base tracking-tight">
+                    Pemindaian Selesai
+                  </h3>
+                  <p className="text-xs text-slate-600 leading-relaxed">
+                    {scanResult?.count === 0
+                      ? "Tidak ditemukan perangkat ESP32 baru pada jaringan ini."
+                      : `Berhasil mendeteksi ${scanResult?.count} perangkat ESP32 dalam ${scanResult?.durationMs}ms.`}
+                  </p>
+                </div>
+
+                <div className="p-2.5 rounded-xl bg-emerald-50 border border-emerald-200 text-xs font-semibold text-emerald-800">
+                  {scanResult?.count === 0
+                    ? "Pastikan ESP32 telah terhubung ke Wi-Fi yang sama"
+                    : "Perangkat siap dikoneksikan ke Database"}
+                </div>
+
+                <button
+                  onClick={() => setIsScanModalOpen(false)}
+                  className="w-full py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs shadow-xs transition active:scale-95 cursor-pointer"
+                >
+                  Lihat Daftar Perangkat
+                </button>
+              </>
+            )}
+
+            {scanState === "error" && (
+              <>
+                <div className="w-16 h-16 rounded-full bg-rose-100 text-rose-600 mx-auto flex items-center justify-center shadow-md shadow-rose-500/20">
+                  <XCircle className="w-8 h-8" />
+                </div>
+
+                <div className="space-y-1">
+                  <h3 className="font-extrabold text-slate-900 text-base tracking-tight">
+                    Pemindaian Gagal
+                  </h3>
+                  <p className="text-xs text-rose-600 leading-relaxed">
+                    {scanError || "Terjadi kesalahan saat pemindaian UDP."}
+                  </p>
+                </div>
+
+                <div className="flex gap-2">
+                  <button
+                    onClick={handleStartScan}
+                    className="flex-1 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-xs transition active:scale-95 cursor-pointer"
+                  >
+                    Coba Lagi
+                  </button>
+                  <button
+                    onClick={() => setIsScanModalOpen(false)}
+                    className="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition cursor-pointer"
+                  >
+                    Tutup
+                  </button>
+                </div>
+              </>
+            )}
           </div>
         </div>
       )}
