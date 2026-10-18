@@ -25,9 +25,10 @@ import {
   ChevronDown,
   ChevronUp,
   Layers,
+  Database,
 } from "lucide-react";
 import { DeviceInfo } from "@/types/iot";
-import WiringSchematicModal from "@/components/devices/WiringSchematicModal";
+import WiringSchematicModal, { ConfiguredLight } from "@/components/devices/WiringSchematicModal";
 
 export default function DevicesPage() {
   const [devices, setDevices] = useState<Array<DeviceInfo & { isActive?: boolean }>>([]);
@@ -56,6 +57,22 @@ export default function DevicesPage() {
   const [isGuideOpen, setIsGuideOpen] = useState(true);
   const [activeGuideTab, setActiveGuideTab] = useState<"step1" | "step2" | "step3" | "troubleshooting">("step1");
   const [isSchematicModalOpen, setIsSchematicModalOpen] = useState(false);
+  const [configuredLights, setConfiguredLights] = useState<ConfiguredLight[]>([]);
+
+  // Fetch daftar lampu tersimpan dari MySQL (configured_lights)
+  const loadConfiguredLights = useCallback(async () => {
+    try {
+      const res = await fetch("/api/control/lights");
+      if (res.ok) {
+        const json = await res.json();
+        if (json.lights) {
+          setConfiguredLights(json.lights);
+        }
+      }
+    } catch (err: unknown) {
+      console.error("Gagal memuat configured_lights dari DB:", err);
+    }
+  }, []);
 
   // Fetch daftar perangkat dari MySQL
   const loadDevices = useCallback(async () => {
@@ -75,7 +92,8 @@ export default function DevicesPage() {
 
   useEffect(() => {
     loadDevices();
-  }, [loadDevices]);
+    loadConfiguredLights();
+  }, [loadDevices, loadConfiguredLights]);
 
   // Handler Trigger UDP Scan
   const handleStartScan = async () => {
@@ -472,7 +490,7 @@ export default function DevicesPage() {
               className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold text-blue-700 bg-blue-50 hover:bg-blue-100 border border-blue-200 transition active:scale-95 shadow-2xs"
             >
               <Layers className="w-3.5 h-3.5 text-blue-600" />
-              <span>Skema Perakitan</span>
+              <span>Skema Perakitan ({configuredLights.length} Relay DB)</span>
             </button>
             <span className="text-[10px] font-mono font-semibold px-2.5 py-1 rounded-full bg-slate-100 text-slate-600 border border-slate-200">
               UDP: 8266 · HTTP: 80
@@ -567,15 +585,52 @@ export default function DevicesPage() {
                     </span>
                   </div>
 
-                  <div className="flex items-center justify-between p-2 rounded-lg bg-white border border-slate-200/70">
-                    <span className="font-sans font-semibold text-slate-800 text-[11px] flex items-center gap-1.5">
-                      <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
-                      Relay / Lampu
-                    </span>
-                    <span className="text-slate-600 text-[11px]">
-                      Utama <span className="px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700 font-bold border border-emerald-200">2</span> · Bebas <span className="px-1.5 py-0.5 rounded bg-slate-100 text-slate-700 font-bold border border-slate-200">16, 17</span>
-                    </span>
-                  </div>
+                  {/* Dynamic Relay Lamp Rows from MySQL (configured_lights) */}
+                  {configuredLights.length === 0 ? (
+                    <div className="flex items-center justify-between p-2 rounded-lg bg-white border border-slate-200/70">
+                      <span className="font-sans font-semibold text-slate-800 text-[11px] flex items-center gap-1.5">
+                        <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+                        Relay Lampu (Utama)
+                      </span>
+                      <span className="text-slate-600 text-[11px]">
+                        <span className="px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700 font-bold border border-emerald-200">
+                          GPIO 2
+                        </span>
+                      </span>
+                    </div>
+                  ) : (
+                    configuredLights.map((light, idx) => (
+                      <div
+                        key={light.id}
+                        className="flex items-center justify-between p-2 rounded-lg bg-white border border-slate-200/70"
+                      >
+                        <span className="font-sans font-semibold text-slate-800 text-[11px] flex items-center gap-1.5 min-w-0">
+                          <span
+                            className={`w-2 h-2 rounded-full shrink-0 ${
+                              light.isDefault
+                                ? "bg-emerald-500"
+                                : idx % 2 === 1
+                                ? "bg-purple-500"
+                                : "bg-orange-500"
+                            }`}
+                          ></span>
+                          <span className="truncate max-w-[125px] sm:max-w-[145px] font-bold text-slate-800">
+                            {light.name}
+                          </span>
+                          {light.isDefault && (
+                            <span className="text-[9px] text-slate-400 font-sans font-normal shrink-0">
+                              (Utama)
+                            </span>
+                          )}
+                        </span>
+                        <span className="text-slate-600 text-[11px] shrink-0 font-mono">
+                          <span className="px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700 font-bold border border-emerald-200">
+                            GPIO {light.pin}
+                          </span>
+                        </span>
+                      </div>
+                    ))
+                  )}
                 </div>
 
                 {/* Tombol Buka Skema Perakitan Visual */}
@@ -888,6 +943,7 @@ export default function DevicesPage() {
       <WiringSchematicModal
         isOpen={isSchematicModalOpen}
         onClose={() => setIsSchematicModalOpen(false)}
+        configuredLights={configuredLights}
       />
     </div>
   );
