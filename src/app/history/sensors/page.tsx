@@ -154,6 +154,8 @@ export default function SensorHistoryPage() {
     light: r.lightLux,
   }));
 
+  const [activeChartTab, setActiveChartTab] = useState<"all" | "temp" | "hum" | "light">("all");
+
   return (
     <div className="space-y-6">
       {/* Header Halaman */}
@@ -345,125 +347,307 @@ export default function SensorHistoryPage() {
 
       {/* Visualisasi Grafik Historis */}
       {chartData.length > 0 && (
-        <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-[0_1px_3px_rgba(0,0,0,0.03)] space-y-3">
-          <div className="flex items-center justify-between">
-            <h3 className="font-bold text-slate-900 text-sm flex items-center gap-2">
-              <Activity className="w-4 h-4 text-blue-600" />
-              <span>Visualisasi Tren Historis ({chartData.length} sampel)</span>
-            </h3>
-            <div className="flex items-center gap-3 text-xs font-bold">
-              <span className="flex items-center gap-1 text-rose-600">
-                <span className="w-2 h-2 rounded-full bg-rose-500" /> Suhu
-              </span>
-              <span className="flex items-center gap-1 text-blue-600">
-                <span className="w-2 h-2 rounded-full bg-blue-500" /> Kelembapan
-              </span>
-              <span className="flex items-center gap-1 text-amber-600">
-                <span className="w-2 h-2 rounded-full bg-amber-500" /> Cahaya
-              </span>
+        <div className="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200/80 shadow-[0_1px_3px_rgba(0,0,0,0.03)] space-y-3">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center border border-blue-100 shrink-0">
+                <Activity className="w-4 h-4" />
+              </div>
+              <div className="flex items-center gap-2">
+                <h3 className="font-bold text-slate-900 text-sm">Tren Historis</h3>
+                <span className="text-[10px] font-semibold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full border border-slate-200/80">
+                  {chartData.length} sampel
+                </span>
+              </div>
+            </div>
+
+            {/* Tab Switcher Pills */}
+            <div className="grid grid-cols-4 w-full sm:w-auto sm:flex sm:items-center bg-slate-100/90 p-1 rounded-xl text-xs font-semibold text-slate-600 border border-slate-200/60">
+              <button
+                onClick={() => setActiveChartTab("all")}
+                className={`px-2 py-1.5 rounded-lg transition-all text-center ${
+                  activeChartTab === "all" ? "bg-white text-slate-900 shadow-xs" : "hover:text-slate-900"
+                }`}
+              >
+                Semua
+              </button>
+              <button
+                onClick={() => setActiveChartTab("temp")}
+                className={`inline-flex items-center justify-center gap-1 px-2 py-1.5 rounded-lg transition-all text-center ${
+                  activeChartTab === "temp" ? "bg-white text-rose-700 shadow-xs" : "hover:text-slate-900"
+                }`}
+              >
+                <Thermometer className="w-3.5 h-3.5 text-rose-500 shrink-0" />
+                <span>Suhu</span>
+              </button>
+              <button
+                onClick={() => setActiveChartTab("hum")}
+                className={`inline-flex items-center justify-center gap-1 px-2 py-1.5 rounded-lg transition-all text-center ${
+                  activeChartTab === "hum" ? "bg-white text-blue-700 shadow-xs" : "hover:text-slate-900"
+                }`}
+              >
+                <Droplets className="w-3.5 h-3.5 text-blue-500 shrink-0" />
+                <span>Lembap</span>
+              </button>
+              <button
+                onClick={() => setActiveChartTab("light")}
+                className={`inline-flex items-center justify-center gap-1 px-2 py-1.5 rounded-lg transition-all text-center ${
+                  activeChartTab === "light" ? "bg-white text-amber-700 shadow-xs" : "hover:text-slate-900"
+                }`}
+              >
+                <Sun className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+                <span>Cahaya</span>
+              </button>
             </div>
           </div>
 
-          <div className="h-56 w-full pt-2 outline-none select-none [&_*]:outline-none [&_*]:focus:outline-none">
+          <div className="h-56 w-full pt-1 outline-none select-none [&_*]:outline-none [&_*]:focus:outline-none">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={chartData} margin={{ top: 8, right: 8, left: -14, bottom: 0 }}>
+              <AreaChart data={chartData} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
+                <defs>
+                  <linearGradient id="histTempGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#f43f5e" stopOpacity={0.25} />
+                    <stop offset="95%" stopColor="#f43f5e" stopOpacity={0.0} />
+                  </linearGradient>
+                  <linearGradient id="histHumGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.25} />
+                    <stop offset="95%" stopColor="#3b82f6" stopOpacity={0.0} />
+                  </linearGradient>
+                  <linearGradient id="histLightGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#f59e0b" stopOpacity={0.25} />
+                    <stop offset="95%" stopColor="#f59e0b" stopOpacity={0.0} />
+                  </linearGradient>
+                </defs>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                <XAxis dataKey="time" tick={{ fontSize: 10, fill: "#94a3b8" }} stroke="#cbd5e1" minTickGap={28} tickLine={false} axisLine={{ stroke: "#e2e8f0" }} />
-                <YAxis tick={{ fontSize: 10, fill: "#94a3b8" }} stroke="#cbd5e1" domain={["auto", "auto"]} width={38} tickLine={false} axisLine={false} tickFormatter={(val) => typeof val === "number" ? val.toFixed(1) : val} />
+                <XAxis
+                  dataKey="time"
+                  tick={{ fontSize: 10, fill: "#94a3b8" }}
+                  stroke="#cbd5e1"
+                  minTickGap={28}
+                  tickLine={false}
+                  axisLine={{ stroke: "#e2e8f0" }}
+                />
+                <YAxis
+                  tick={{ fontSize: 10, fill: "#94a3b8" }}
+                  stroke="#cbd5e1"
+                  domain={["auto", "auto"]}
+                  width={40}
+                  tickLine={false}
+                  axisLine={false}
+                  tickFormatter={(val) => (typeof val === "number" ? val.toFixed(1) : val)}
+                />
                 <Tooltip
                   formatter={(val: unknown, name: unknown) => [
-                    typeof val === "number" ? val.toFixed(1) : "-",
-                    name === "temp" ? "Suhu (°C)" : name === "humidity" ? "Kelembapan (%)" : "Cahaya (Lux)",
+                    typeof val === "number"
+                      ? `${val.toFixed(1)} ${
+                          name === "temp" ? "°C" : name === "humidity" ? "%" : "Lux"
+                        }`
+                      : "-",
+                    name === "temp" ? "Suhu" : name === "humidity" ? "Kelembapan" : "Cahaya",
                   ]}
-                  contentStyle={{ borderRadius: "12px", border: "1px solid #cbd5e1", fontSize: "12px" }}
+                  contentStyle={{
+                    borderRadius: "12px",
+                    border: "1px solid #cbd5e1",
+                    fontSize: "12px",
+                    boxShadow: "0 4px 6px -1px rgba(0,0,0,0.07)",
+                  }}
                 />
-                <Area type="monotone" dataKey="temp" stroke="#f43f5e" fill="#f43f5e" fillOpacity={0.12} strokeWidth={2} isAnimationActive={false} />
-                <Area type="monotone" dataKey="humidity" stroke="#3b82f6" fill="#3b82f6" fillOpacity={0.12} strokeWidth={2} isAnimationActive={false} />
-                <Area type="monotone" dataKey="light" stroke="#f59e0b" fill="#f59e0b" fillOpacity={0.12} strokeWidth={2} isAnimationActive={false} />
+                {(activeChartTab === "all" || activeChartTab === "temp") && (
+                  <Area
+                    type="monotone"
+                    dataKey="temp"
+                    stroke="#f43f5e"
+                    fill="url(#histTempGrad)"
+                    strokeWidth={2}
+                    isAnimationActive={false}
+                  />
+                )}
+                {(activeChartTab === "all" || activeChartTab === "hum") && (
+                  <Area
+                    type="monotone"
+                    dataKey="humidity"
+                    stroke="#3b82f6"
+                    fill="url(#histHumGrad)"
+                    strokeWidth={2}
+                    isAnimationActive={false}
+                  />
+                )}
+                {(activeChartTab === "all" || activeChartTab === "light") && (
+                  <Area
+                    type="monotone"
+                    dataKey="light"
+                    stroke="#f59e0b"
+                    fill="url(#histLightGrad)"
+                    strokeWidth={2}
+                    isAnimationActive={false}
+                  />
+                )}
               </AreaChart>
             </ResponsiveContainer>
           </div>
         </div>
       )}
 
-      {/* Tabel Data Historis */}
+      {/* Tabel & Daftar Data Historis */}
       <div className="bg-white rounded-2xl border border-slate-200/80 shadow-[0_1px_3px_rgba(0,0,0,0.03)] overflow-hidden">
-        <div className="p-4 border-b border-slate-200 flex items-center justify-between">
+        <div className="p-4 border-b border-slate-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <div className="flex items-center gap-2 text-sm font-bold text-slate-900">
-            <Database className="w-4 h-4 text-blue-600" />
-            <span>Tabel sensor_readings ({total} catatan)</span>
+            <Database className="w-4 h-4 text-blue-600 shrink-0" />
+            <span>Rekaman Data Telemetri</span>
+            <span className="text-xs font-normal text-slate-400 font-mono">({total} entri)</span>
           </div>
-          <span className="text-xs font-semibold text-slate-500">
-            Sumber Data: {systemMode === "real" ? "ESP32 Fisik" : "Simulator"}
-          </span>
+          <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-500">
+            <span className="w-1.5 h-1.5 rounded-full bg-slate-400" />
+            <span>Sumber: {systemMode === "real" ? "ESP32 Fisik" : "Simulator"}</span>
+          </div>
         </div>
 
         {records.length === 0 ? (
-          <div className="py-12 text-center text-slate-400 text-xs">
+          <div className="py-12 text-center text-slate-400 text-xs px-4">
             {systemMode === "real"
               ? "Belum ada rekaman data riil dari ESP32 di database. Pastikan ESP32 telah terhubung dan mengirim telemetri."
               : "Belum ada data simulasi yang tersimpan di database."}
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
-              <thead>
-                <tr className="border-b border-slate-200 bg-slate-50/70 text-slate-500 font-bold uppercase tracking-wider text-[10px]">
-                  <th className="py-3 px-4">Waktu Rekam</th>
-                  <th className="py-3 px-4">ID Perangkat</th>
-                  <th className="py-3 px-4">Suhu (°C)</th>
-                  <th className="py-3 px-4">Kelembapan (%)</th>
-                  <th className="py-3 px-4">Cahaya (Lux)</th>
-                  <th className="py-3 px-4">Status</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
-                {records.map((r) => (
-                  <tr key={r.id} className="hover:bg-slate-50/60 transition">
-                    <td className="py-3 px-4 text-slate-600 font-mono whitespace-nowrap">
-                      {new Date(r.timestamp).toLocaleString("id-ID")}
-                    </td>
-                    <td className="py-3 px-4 font-bold text-slate-900 font-mono">
-                      {r.deviceId}
-                    </td>
-                    <td className="py-3 px-4 font-mono font-bold text-rose-600">
-                      {r.temperature !== null ? `${r.temperature.toFixed(1)} °C` : "null"}
-                    </td>
-                    <td className="py-3 px-4 font-mono font-bold text-blue-600">
-                      {r.humidity !== null ? `${r.humidity.toFixed(1)} %` : "null"}
-                    </td>
-                    <td className="py-3 px-4 font-mono font-bold text-amber-600">
-                      {r.lightLux !== null ? `${Math.round(r.lightLux).toLocaleString()} Lux` : "null"}
-                    </td>
-                    <td className="py-3 px-4">
-                      <span
-                        className={`inline-flex px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${
-                          r.isSimulated
-                            ? "bg-amber-50 text-amber-700 border-amber-200"
-                            : "bg-emerald-50 text-emerald-700 border-emerald-200"
-                        }`}
-                      >
-                        {r.isSimulated ? "SIMULASI" : "DATA RIIL ESP32"}
+          <>
+            {/* Tampilan Mobile: Kartu Vertikal Ringkas & Rapi */}
+            <div className="sm:hidden divide-y divide-slate-100">
+              {records.map((r) => (
+                <div key={r.id} className="p-3.5 space-y-2.5 hover:bg-slate-50/50 transition">
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-1.5 min-w-0">
+                      <span className="font-mono text-xs font-bold text-slate-800 bg-slate-100 px-2 py-0.5 rounded-md border border-slate-200/80 truncate">
+                        {r.deviceId}
                       </span>
-                    </td>
+                      <span className="text-[10px] text-slate-400 font-mono shrink-0">
+                        #{r.id}
+                      </span>
+                    </div>
+                    <span
+                      className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold border shrink-0 ${
+                        r.isSimulated
+                          ? "bg-amber-50 text-amber-700 border-amber-200"
+                          : "bg-emerald-50 text-emerald-700 border-emerald-200"
+                      }`}
+                    >
+                      <span
+                        className={`w-1 h-1 rounded-full ${
+                          r.isSimulated ? "bg-amber-500" : "bg-emerald-500 animate-pulse"
+                        }`}
+                      />
+                      {r.isSimulated ? "SIMULASI" : "DATA RIIL"}
+                    </span>
+                  </div>
+
+                  {/* 3 Metrik Micro-Grid */}
+                  <div className="grid grid-cols-3 gap-2 text-center bg-slate-50/80 p-2 rounded-xl border border-slate-100">
+                    <div className="space-y-0.5">
+                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+                        Suhu
+                      </span>
+                      <span className="text-xs font-black font-mono text-rose-600 block">
+                        {r.temperature !== null ? `${r.temperature.toFixed(1)} °C` : "-"}
+                      </span>
+                    </div>
+                    <div className="space-y-0.5 border-x border-slate-200/60 px-1">
+                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+                        Lembap
+                      </span>
+                      <span className="text-xs font-black font-mono text-blue-600 block">
+                        {r.humidity !== null ? `${r.humidity.toFixed(1)} %` : "-"}
+                      </span>
+                    </div>
+                    <div className="space-y-0.5">
+                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+                        Cahaya
+                      </span>
+                      <span className="text-xs font-black font-mono text-amber-600 block">
+                        {r.lightLux !== null ? `${Math.round(r.lightLux)} Lx` : "-"}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Waktu Rekam */}
+                  <div className="text-[10px] text-slate-400 font-mono flex items-center justify-between pt-0.5">
+                    <span>Waktu Rekam</span>
+                    <span className="text-slate-600 font-medium">
+                      {new Date(r.timestamp).toLocaleString("id-ID", {
+                        day: "2-digit",
+                        month: "2-digit",
+                        year: "numeric",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                        second: "2-digit",
+                      })}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Tampilan Desktop: Tabel Lengkap */}
+            <div className="hidden sm:block overflow-x-auto">
+              <table className="w-full text-left text-xs">
+                <thead>
+                  <tr className="border-b border-slate-200 bg-slate-50/70 text-slate-500 font-bold uppercase tracking-wider text-[10px]">
+                    <th className="py-3 px-4">Waktu Rekam</th>
+                    <th className="py-3 px-4">ID Perangkat</th>
+                    <th className="py-3 px-4">Suhu (°C)</th>
+                    <th className="py-3 px-4">Kelembapan (%)</th>
+                    <th className="py-3 px-4">Cahaya (Lux)</th>
+                    <th className="py-3 px-4">Status</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {records.map((r) => (
+                    <tr key={r.id} className="hover:bg-slate-50/60 transition">
+                      <td className="py-3 px-4 text-slate-600 font-mono whitespace-nowrap">
+                        {new Date(r.timestamp).toLocaleString("id-ID")}
+                      </td>
+                      <td className="py-3 px-4 font-bold text-slate-900 font-mono">
+                        {r.deviceId}
+                      </td>
+                      <td className="py-3 px-4 font-mono font-bold text-rose-600">
+                        {r.temperature !== null ? `${r.temperature.toFixed(1)} °C` : "null"}
+                      </td>
+                      <td className="py-3 px-4 font-mono font-bold text-blue-600">
+                        {r.humidity !== null ? `${r.humidity.toFixed(1)} %` : "null"}
+                      </td>
+                      <td className="py-3 px-4 font-mono font-bold text-amber-600">
+                        {r.lightLux !== null ? `${Math.round(r.lightLux).toLocaleString()} Lux` : "null"}
+                      </td>
+                      <td className="py-3 px-4">
+                        <span
+                          className={`inline-flex px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${
+                            r.isSimulated
+                              ? "bg-amber-50 text-amber-700 border-amber-200"
+                              : "bg-emerald-50 text-emerald-700 border-emerald-200"
+                          }`}
+                        >
+                          {r.isSimulated ? "SIMULASI" : "DATA RIIL ESP32"}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </>
         )}
 
         {/* Pagination Bar */}
-        <div className="p-4 border-t border-slate-200 flex items-center justify-between text-xs text-slate-500">
-          <span>
-            Halaman {page} dari {totalPages} ({total} baris)
-          </span>
+        <div className="p-3.5 sm:p-4 border-t border-slate-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs text-slate-500">
+          <div className="text-center sm:text-left">
+            Halaman <span className="font-bold text-slate-700">{page}</span> dari{" "}
+            <span className="font-bold text-slate-700">{totalPages}</span>{" "}
+            <span className="text-slate-400">({total} total entri)</span>
+          </div>
 
-          <div className="flex items-center gap-2">
+          <div className="grid grid-cols-2 sm:flex sm:items-center gap-2 w-full sm:w-auto">
             <button
               onClick={() => setPage((p) => Math.max(1, p - 1))}
               disabled={page <= 1}
-              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 font-bold disabled:opacity-40 disabled:cursor-not-allowed"
+              className="inline-flex items-center justify-center gap-1 px-3 py-1.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 font-bold disabled:opacity-40 disabled:cursor-not-allowed shadow-2xs"
             >
               <ChevronLeft className="w-3.5 h-3.5" />
               <span>Sebelumnya</span>
@@ -471,7 +655,7 @@ export default function SensorHistoryPage() {
             <button
               onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
               disabled={page >= totalPages}
-              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 font-bold disabled:opacity-40 disabled:cursor-not-allowed"
+              className="inline-flex items-center justify-center gap-1 px-3 py-1.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 font-bold disabled:opacity-40 disabled:cursor-not-allowed shadow-2xs"
             >
               <span>Selanjutnya</span>
               <ChevronRight className="w-3.5 h-3.5" />
