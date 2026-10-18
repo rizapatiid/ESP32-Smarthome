@@ -12,7 +12,6 @@ import {
   Database,
   ZoomIn,
   ShieldAlert,
-  Sparkles,
 } from "lucide-react";
 
 export interface ConfiguredLight {
@@ -49,7 +48,7 @@ export default function WiringSchematicModal({
 
   if (!isOpen) return null;
 
-  // Fallback lampu jika DB belum terisi
+  // Fallback lampu jika DB kosong
   const effectiveLights: ConfiguredLight[] =
     configuredLights.length > 0
       ? configuredLights
@@ -63,10 +62,10 @@ export default function WiringSchematicModal({
   const isBhActive = activeFilter === "all" || activeFilter === "bh1750";
   const isRelayActive = activeFilter === "all" || activeFilter === "relay";
 
-  // Dimensi dinamis modul relay
+  // Dimensi modul relay dinamis berdasarkan jumlah lampu di database
   const relayCount = effectiveLights.length;
-  const relayModuleHeight = Math.max(220, 80 + relayCount * 55);
-  const svgCanvasHeight = Math.max(540, 300 + relayModuleHeight);
+  const relayModuleHeight = Math.max(220, 80 + relayCount * 56);
+  const svgCanvasHeight = Math.max(560, 290 + relayModuleHeight);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-slate-950/75 backdrop-blur-xs animate-in fade-in duration-150">
@@ -177,7 +176,7 @@ export default function WiringSchematicModal({
               <svg
                 viewBox={`0 0 980 ${svgCanvasHeight}`}
                 className="w-full h-auto select-none"
-                style={{ maxHeight: isZoomed ? "none" : "480px" }}
+                style={{ maxHeight: isZoomed ? "none" : "490px" }}
               >
                 {/* Patterns & Gradients */}
                 <defs>
@@ -210,7 +209,7 @@ export default function WiringSchematicModal({
                     x="0"
                     y="0"
                     width="190"
-                    height="470"
+                    height="490"
                     rx="12"
                     fill="url(#boardGrad)"
                     stroke="#3b82f6"
@@ -219,12 +218,12 @@ export default function WiringSchematicModal({
                   {/* Copper Mounting Holes */}
                   <circle cx="16" cy="16" r="4.5" fill="#090d16" stroke="#ca8a04" strokeWidth="1.5" />
                   <circle cx="174" cy="16" r="4.5" fill="#090d16" stroke="#ca8a04" strokeWidth="1.5" />
-                  <circle cx="16" cy="454" r="4.5" fill="#090d16" stroke="#ca8a04" strokeWidth="1.5" />
-                  <circle cx="174" cy="454" r="4.5" fill="#090d16" stroke="#ca8a04" strokeWidth="1.5" />
+                  <circle cx="16" cy="474" r="4.5" fill="#090d16" stroke="#ca8a04" strokeWidth="1.5" />
+                  <circle cx="174" cy="474" r="4.5" fill="#090d16" stroke="#ca8a04" strokeWidth="1.5" />
 
                   {/* Micro-USB Port at Bottom */}
-                  <rect x="70" y="452" width="50" height="20" rx="3" fill="#cbd5e1" stroke="#64748b" strokeWidth="1" />
-                  <rect x="80" y="460" width="30" height="9" rx="1.5" fill="#0f172a" />
+                  <rect x="70" y="472" width="50" height="20" rx="3" fill="#cbd5e1" stroke="#64748b" strokeWidth="1" />
+                  <rect x="80" y="480" width="30" height="9" rx="1.5" fill="#0f172a" />
 
                   {/* Metal RF Shield ESP-WROOM-32 */}
                   <rect x="25" y="45" width="140" height="120" rx="6" fill="url(#rfShieldGrad)" stroke="#cbd5e1" strokeWidth="1.5" />
@@ -307,66 +306,108 @@ export default function WiringSchematicModal({
                 </g>
 
                 {/* ============================================================== */}
-                {/* 2. Sensor DHT22 (Top-Right)                                    */}
+                {/* 2. Sensor DHT22 (Top-Right) — PIN PADA SISI KIRI MODUL         */}
                 {/* ============================================================== */}
                 <g
                   transform="translate(670, 35)"
                   className="transition-opacity duration-200"
                   opacity={isDhtActive ? 1 : 0.15}
                 >
-                  <rect x="0" y="0" width="240" height="95" rx="10" fill="#1e293b" stroke="#3b82f6" strokeWidth="1.5" />
-                  {/* Grille ventilation pattern */}
-                  <rect x="12" y="12" width="70" height="70" rx="6" fill="#f8fafc" stroke="#cbd5e1" strokeWidth="1.5" />
-                  <line x1="22" y1="25" x2="72" y2="25" stroke="#94a3b8" strokeWidth="2" strokeLinecap="round" />
-                  <line x1="22" y1="37" x2="72" y2="37" stroke="#94a3b8" strokeWidth="2" strokeLinecap="round" />
-                  <line x1="22" y1="49" x2="72" y2="49" stroke="#94a3b8" strokeWidth="2" strokeLinecap="round" />
-                  <line x1="22" y1="61" x2="72" y2="61" stroke="#94a3b8" strokeWidth="2" strokeLinecap="round" />
-
-                  <text x="95" y="30" fill="#ffffff" fontSize="12" fontWeight="bold" fontFamily="sans-serif">
+                  <rect x="0" y="0" width="250" height="110" rx="10" fill="#1e293b" stroke="#3b82f6" strokeWidth="1.5" />
+                  
+                  {/* Judul Modul di Atas */}
+                  <text x="16" y="22" fill="#ffffff" fontSize="11" fontWeight="bold" fontFamily="sans-serif">
                     DHT22 / AM2302
                   </text>
-                  <text x="95" y="46" fill="#94a3b8" fontSize="9" fontFamily="sans-serif">
-                    Suhu &amp; Kelembapan
+                  <text x="16" y="34" fill="#94a3b8" fontSize="8.5" fontFamily="sans-serif">
+                    Sensor Suhu &amp; Kelembapan
                   </text>
 
-                  {/* Sensor Pin Indicators */}
-                  <g transform="translate(95, 58)">
-                    <circle cx="8" cy="8" r="4" fill="#ef4444" />
-                    <text x="16" y="11" fill="#fca5a5" fontSize="8" fontFamily="monospace">1. VCC (3.3V)</text>
-                    <circle cx="8" cy="22" r="4" fill="#3b82f6" />
-                    <text x="16" y="25" fill="#93c5fd" fontSize="8" fontFamily="monospace">2. DATA (GPIO 4)</text>
-                    <circle cx="120" cy="8" r="4" fill="#64748b" />
-                    <text x="128" y="11" fill="#cbd5e1" fontSize="8" fontFamily="monospace">GND</text>
+                  {/* TERMINAL PIN PADA SISI KIRI (Menghadap kabel, tidak menabrak gambar/teks) */}
+                  {/* Pin 1: VCC */}
+                  <rect x="-6" y="44" width="12" height="8" rx="1.5" fill="#ef4444" />
+                  <circle cx="0" cy="48" r="3.5" fill="#ef4444" />
+                  <text x="12" y="52" fill="#fca5a5" fontSize="8.5" fontWeight="bold" fontFamily="monospace">
+                    1. VCC (3.3V)
+                  </text>
+
+                  {/* Pin 2: DATA */}
+                  <rect x="-6" y="66" width="12" height="8" rx="1.5" fill="#3b82f6" />
+                  <circle cx="0" cy="70" r="3.5" fill="#3b82f6" />
+                  <text x="12" y="74" fill="#93c5fd" fontSize="8.5" fontWeight="bold" fontFamily="monospace">
+                    2. DATA (GPIO 4)
+                  </text>
+
+                  {/* Pin 4: GND */}
+                  <rect x="-6" y="88" width="12" height="8" rx="1.5" fill="#94a3b8" />
+                  <circle cx="0" cy="92" r="3.5" fill="#94a3b8" />
+                  <text x="12" y="96" fill="#cbd5e1" fontSize="8.5" fontWeight="bold" fontFamily="monospace">
+                    4. GND (Ground)
+                  </text>
+
+                  {/* Gambar Sensor Putih Grille diletakkan di SISI KANAN (Aman, tidak dilalui kabel) */}
+                  <g transform="translate(165, 38)">
+                    <rect x="0" y="0" width="68" height="60" rx="6" fill="#f8fafc" stroke="#cbd5e1" strokeWidth="1.5" />
+                    <line x1="8" y1="12" x2="60" y2="12" stroke="#94a3b8" strokeWidth="2" strokeLinecap="round" />
+                    <line x1="8" y1="22" x2="60" y2="22" stroke="#94a3b8" strokeWidth="2" strokeLinecap="round" />
+                    <line x1="8" y1="32" x2="60" y2="32" stroke="#94a3b8" strokeWidth="2" strokeLinecap="round" />
+                    <line x1="8" y1="42" x2="60" y2="42" stroke="#94a3b8" strokeWidth="2" strokeLinecap="round" />
+                    <line x1="8" y1="50" x2="60" y2="50" stroke="#94a3b8" strokeWidth="2" strokeLinecap="round" />
                   </g>
                 </g>
 
                 {/* ============================================================== */}
-                {/* 3. Sensor BH1750 (Middle-Right)                                */}
+                {/* 3. Sensor BH1750 (Middle-Right) — PIN PADA SISI KIRI MODUL     */}
                 {/* ============================================================== */}
                 <g
-                  transform="translate(670, 150)"
+                  transform="translate(670, 160)"
                   className="transition-opacity duration-200"
                   opacity={isBhActive ? 1 : 0.15}
                 >
-                  <rect x="0" y="0" width="240" height="95" rx="10" fill="#1e293b" stroke="#eab308" strokeWidth="1.5" />
-                  {/* Clear Glass Optical Dome */}
-                  <circle cx="48" cy="48" r="24" fill="#0f172a" stroke="#eab308" strokeWidth="2" />
-                  <circle cx="48" cy="48" r="15" fill="#38bdf8" fillOpacity="0.4" />
-                  <circle cx="52" cy="44" r="5" fill="#ffffff" fillOpacity="0.8" />
-
-                  <text x="88" y="30" fill="#ffffff" fontSize="12" fontWeight="bold" fontFamily="sans-serif">
+                  <rect x="0" y="0" width="250" height="110" rx="10" fill="#1e293b" stroke="#eab308" strokeWidth="1.5" />
+                  
+                  {/* Judul Modul di Atas */}
+                  <text x="16" y="22" fill="#ffffff" fontSize="11" fontWeight="bold" fontFamily="sans-serif">
                     BH1750FVI
                   </text>
-                  <text x="88" y="46" fill="#94a3b8" fontSize="9" fontFamily="sans-serif">
-                    Sensor Intensitas Cahaya (I2C)
+                  <text x="16" y="34" fill="#94a3b8" fontSize="8.5" fontFamily="sans-serif">
+                    Sensor Cahaya Lux (I2C)
                   </text>
 
-                  <g transform="translate(88, 56)">
-                    <rect x="0" y="0" width="135" height="26" rx="5" fill="#0f172a" />
-                    <text x="8" y="17" fill="#f87171" fontSize="8.5" fontFamily="monospace">VCC</text>
-                    <text x="36" y="17" fill="#94a3b8" fontSize="8.5" fontFamily="monospace">GND</text>
-                    <text x="66" y="17" fill="#4ade80" fontSize="8.5" fontWeight="bold" fontFamily="monospace">SCL(22)</text>
-                    <text x="104" y="17" fill="#fde047" fontSize="8.5" fontWeight="bold" fontFamily="monospace">SDA(21)</text>
+                  {/* TERMINAL PIN PADA SISI KIRI (Menghadap kabel) */}
+                  {/* Pin 1: VCC */}
+                  <rect x="-6" y="42" width="12" height="8" rx="1.5" fill="#ef4444" />
+                  <circle cx="0" cy="46" r="3.5" fill="#ef4444" />
+                  <text x="12" y="50" fill="#fca5a5" fontSize="8.5" fontWeight="bold" fontFamily="monospace">
+                    VCC (3.3V)
+                  </text>
+
+                  {/* Pin 2: GND */}
+                  <rect x="-6" y="60" width="12" height="8" rx="1.5" fill="#94a3b8" />
+                  <circle cx="0" cy="64" r="3.5" fill="#94a3b8" />
+                  <text x="12" y="68" fill="#cbd5e1" fontSize="8.5" fontWeight="bold" fontFamily="monospace">
+                    GND (Ground)
+                  </text>
+
+                  {/* Pin 3: SCL */}
+                  <rect x="-6" y="78" width="12" height="8" rx="1.5" fill="#22c55e" />
+                  <circle cx="0" cy="82" r="3.5" fill="#22c55e" />
+                  <text x="12" y="86" fill="#4ade80" fontSize="8.5" fontWeight="bold" fontFamily="monospace">
+                    SCL ➔ GPIO 22
+                  </text>
+
+                  {/* Pin 4: SDA */}
+                  <rect x="-6" y="96" width="12" height="8" rx="1.5" fill="#eab308" />
+                  <circle cx="0" cy="100" r="3.5" fill="#eab308" />
+                  <text x="12" y="104" fill="#fde047" fontSize="8.5" fontWeight="bold" fontFamily="monospace">
+                    SDA ➔ GPIO 21
+                  </text>
+
+                  {/* Kubah Optik Kaca diletakkan di SISI KANAN (Aman, tidak terpotong kabel) */}
+                  <g transform="translate(195, 68)">
+                    <circle cx="0" cy="0" r="22" fill="#0f172a" stroke="#eab308" strokeWidth="2" />
+                    <circle cx="0" cy="0" r="14" fill="#38bdf8" fillOpacity="0.4" />
+                    <circle cx="4" cy="-4" r="5" fill="#ffffff" fillOpacity="0.8" />
                   </g>
                 </g>
 
@@ -374,14 +415,14 @@ export default function WiringSchematicModal({
                 {/* 4. Modul Relay Multi-Channel dari Database (Bottom-Right)       */}
                 {/* ============================================================== */}
                 <g
-                  transform="translate(620, 265)"
+                  transform="translate(620, 285)"
                   className="transition-opacity duration-200"
                   opacity={isRelayActive ? 1 : 0.15}
                 >
                   <rect
                     x="0"
                     y="0"
-                    width="290"
+                    width="300"
                     height={relayModuleHeight}
                     rx="12"
                     fill="#1e293b"
@@ -395,30 +436,56 @@ export default function WiringSchematicModal({
                     Tersinkronisasi otomatis dengan {effectiveLights.length} lampu di MySQL
                   </text>
 
+                  {/* TERMINAL PIN INPUT PADA SISI KIRI ATAS */}
+                  {/* VCC 5V */}
+                  <g transform="translate(0, 48)">
+                    <rect x="-6" y="-4" width="12" height="8" rx="1.5" fill="#ef4444" />
+                    <circle cx="0" cy="0" r="3.5" fill="#ef4444" />
+                    <text x="12" y="3" fill="#fca5a5" fontSize="8" fontWeight="bold" fontFamily="monospace">
+                      VCC (5V VIN)
+                    </text>
+                  </g>
+
+                  {/* GND */}
+                  <g transform="translate(0, 66)">
+                    <rect x="-6" y="-4" width="12" height="8" rx="1.5" fill="#94a3b8" />
+                    <circle cx="0" cy="0" r="3.5" fill="#94a3b8" />
+                    <text x="12" y="3" fill="#cbd5e1" fontSize="8" fontWeight="bold" fontFamily="monospace">
+                      GND
+                    </text>
+                  </g>
+
                   {/* Channel Relay Sesuai Lampu Database */}
                   {effectiveLights.map((light, idx) => {
-                    const blockY = 48 + idx * 52;
+                    const blockY = 82 + idx * 56;
                     const pal = LIGHT_PALETTES[idx % LIGHT_PALETTES.length];
                     return (
-                      <g key={light.id} transform={`translate(15, ${blockY})`}>
-                        {/* Blue Relay Cube */}
-                        <rect x="0" y="0" width="95" height="44" rx="4" fill="#0284c7" stroke="#38bdf8" strokeWidth="1" />
-                        <text x="47" y="18" fill="#ffffff" fontSize="9" fontWeight="bold" fontFamily="sans-serif" textAnchor="middle">
-                          CH {idx + 1}: GPIO {light.pin}
-                        </text>
-                        <text x="47" y="31" fill="#bae6fd" fontSize="7.5" fontFamily="sans-serif" textAnchor="middle">
-                          {light.name.substring(0, 13)}
+                      <g key={light.id} transform={`translate(0, ${blockY})`}>
+                        {/* Terminal Pin Input Sinyal pada Sisi Kiri Luar (x=0) */}
+                        <rect x="-6" y="16" width="12" height="8" rx="1.5" fill={pal.stroke} />
+                        <circle cx="0" cy="20" r="3.5" fill={pal.stroke} />
+                        <text x="12" y="24" fill={pal.stroke} fontSize="8" fontWeight="bold" fontFamily="monospace">
+                          IN{idx + 1}
                         </text>
 
-                        {/* Terminal Blocks */}
-                        <rect x="105" y="2" width="26" height="40" rx="3" fill="#0f766e" />
-                        <circle cx="118" cy="12" r="3" fill="#cbd5e1" />
-                        <circle cx="118" cy="30" r="3" fill="#cbd5e1" />
+                        {/* Blue Relay Cube di Tengah */}
+                        <rect x="45" y="0" width="85" height="42" rx="4" fill="#0284c7" stroke="#38bdf8" strokeWidth="1" />
+                        <text x="87" y="18" fill="#ffffff" fontSize="8.5" fontWeight="bold" fontFamily="sans-serif" textAnchor="middle">
+                          CH {idx + 1}: D{light.pin}
+                        </text>
+                        <text x="87" y="30" fill="#bae6fd" fontSize="7" fontFamily="sans-serif" textAnchor="middle">
+                          {light.name.substring(0, 11)}
+                        </text>
 
-                        {/* Glowing Lamp Bulb Output */}
-                        <g transform="translate(145, 8)">
+                        {/* Terminal Blok Baut Hijau */}
+                        <rect x="140" y="2" width="24" height="38" rx="3" fill="#0f766e" />
+                        <circle cx="152" cy="12" r="3" fill="#cbd5e1" />
+                        <circle cx="152" cy="28" r="3" fill="#cbd5e1" />
+
+                        {/* Ikon Lampu Menyala Kuning di Sisi Kanan */}
+                        <g transform="translate(178, 6)">
                           <circle cx="14" cy="14" r="11" fill="#fbbf24" filter="url(#wireGlow)" fillOpacity="0.85" />
-                          <text x="32" y="14" fill="#fef08a" fontSize="9.5" fontWeight="bold" fontFamily="sans-serif">
+                          <text x="32" y="14" fill="#fef08a" fontSize="9" fontWeight="bold" fontFamily="sans-serif">
                             {light.name}
                           </text>
                           <text x="32" y="25" fill="#94a3b8" fontSize="7.5" fontFamily="monospace">
@@ -428,62 +495,36 @@ export default function WiringSchematicModal({
                       </g>
                     );
                   })}
-
-                  {/* Relay Low-Voltage Input Pins at Bottom */}
-                  <g transform={`translate(15, ${relayModuleHeight - 32})`}>
-                    <rect x="0" y="0" width="260" height="24" rx="4" fill="#0f172a" />
-                    <text x="12" y="16" fill="#f87171" fontSize="8.5" fontWeight="bold" fontFamily="monospace">
-                      VCC(5V)
-                    </text>
-                    <text x="65" y="16" fill="#94a3b8" fontSize="8.5" fontWeight="bold" fontFamily="monospace">
-                      GND
-                    </text>
-                    {effectiveLights.map((light, idx) => {
-                      const posX = 105 + idx * 48;
-                      const pal = LIGHT_PALETTES[idx % LIGHT_PALETTES.length];
-                      return (
-                        <text
-                          key={light.id}
-                          x={posX}
-                          y="16"
-                          fill={pal.stroke}
-                          fontSize="8.5"
-                          fontWeight="bold"
-                          fontFamily="monospace"
-                        >
-                          IN{idx + 1}(D{light.pin})
-                        </text>
-                      );
-                    })}
-                  </g>
                 </g>
 
                 {/* ============================================================== */}
-                {/* 5. JUMPER WIRES (Lengkungan Halus & Terstruktur)                 */}
+                {/* 5. JUMPER WIRES (LENGKUNGAN BERSIH TANPA MENABRAK KOMPONEN)    */}
                 {/* ============================================================== */}
 
                 {/* WIRE 1: DHT22 DATA (Biru) ➔ GPIO 4 */}
+                {/* Berakhir TEPAT di x=670 y=105 (Pin 2 DATA sisi kiri box DHT22) */}
                 <g opacity={isDhtActive ? 1 : 0.08} className="transition-opacity duration-200">
                   <path
-                    d="M 54 300 C 15 300, -10 110, 420 110 C 530 110, 620 92, 780 92"
+                    d="M 54 300 C 15 300, 15 105, 380 105 C 500 105, 590 105, 670 105"
                     fill="none"
                     stroke="#3b82f6"
                     strokeWidth="3.2"
                     strokeLinecap="round"
                   />
                   <circle cx="54" cy="300" r="4.5" fill="#3b82f6" />
-                  <circle cx="780" cy="92" r="4.5" fill="#3b82f6" />
-                  {/* Badge Label */}
-                  <rect x="360" y="100" width="95" height="18" rx="4" fill="#1e3a8a" stroke="#3b82f6" strokeWidth="1" />
-                  <text x="407" y="113" fill="#bfdbfe" fontSize="8.5" fontWeight="bold" fontFamily="monospace" textAnchor="middle">
+                  <circle cx="670" cy="105" r="4.5" fill="#3b82f6" />
+                  {/* Badge Label Mengambang */}
+                  <rect x="360" y="95" width="95" height="18" rx="4" fill="#1e3a8a" stroke="#3b82f6" strokeWidth="1" />
+                  <text x="407" y="108" fill="#bfdbfe" fontSize="8.5" fontWeight="bold" fontFamily="monospace" textAnchor="middle">
                     GPIO 4 (DATA)
                   </text>
                 </g>
 
-                {/* WIRE 2: DHT22 VCC (Merah) ➔ 3.3V */}
+                {/* WIRE 2: DHT22 VCC (Merah Putus-putus) ➔ 3.3V */}
+                {/* Berakhir TEPAT di x=670 y=83 (Pin 1 VCC sisi kiri box DHT22) */}
                 <g opacity={isDhtActive ? 1 : 0.08} className="transition-opacity duration-200">
                   <path
-                    d="M 54 185 C 20 185, -5 65, 380 65 C 520 65, 630 82, 765 82"
+                    d="M 54 185 C 20 185, 20 83, 360 83 C 480 83, 580 83, 670 83"
                     fill="none"
                     stroke="#ef4444"
                     strokeWidth="2.5"
@@ -491,60 +532,64 @@ export default function WiringSchematicModal({
                     strokeDasharray="6,3"
                   />
                   <circle cx="54" cy="185" r="4" fill="#ef4444" />
-                  <circle cx="765" cy="82" r="4" fill="#ef4444" />
+                  <circle cx="670" cy="83" r="4" fill="#ef4444" />
                 </g>
 
                 {/* WIRE 3: DHT22 GND (Abu-abu) ➔ GND */}
+                {/* Berakhir TEPAT di x=670 y=127 (Pin 4 GND sisi kiri box DHT22) */}
                 <g opacity={isDhtActive ? 1 : 0.08} className="transition-opacity duration-200">
                   <path
-                    d="M 54 215 C 30 215, 10 85, 410 85 C 560 85, 680 82, 885 82"
+                    d="M 54 215 C 25 215, 25 127, 390 127 C 500 127, 590 127, 670 127"
                     fill="none"
                     stroke="#94a3b8"
                     strokeWidth="2"
                     strokeLinecap="round"
                   />
                   <circle cx="54" cy="215" r="3.5" fill="#94a3b8" />
-                  <circle cx="885" cy="82" r="3.5" fill="#94a3b8" />
+                  <circle cx="670" cy="127" r="3.5" fill="#94a3b8" />
                 </g>
 
                 {/* WIRE 4: BH1750 SDA (Kuning) ➔ GPIO 21 */}
+                {/* Berakhir TEPAT di x=670 y=260 (Pin SDA sisi kiri box BH1750) */}
                 <g opacity={isBhActive ? 1 : 0.08} className="transition-opacity duration-200">
                   <path
-                    d="M 54 335 C -5 335, 260 215, 480 215 C 580 215, 680 220, 815 220"
+                    d="M 54 335 C 10 335, 260 260, 480 260 C 560 260, 610 260, 670 260"
                     fill="none"
                     stroke="#eab308"
                     strokeWidth="3.2"
                     strokeLinecap="round"
                   />
                   <circle cx="54" cy="335" r="4.5" fill="#eab308" />
-                  <circle cx="815" cy="220" r="4.5" fill="#eab308" />
-                  <rect x="360" y="206" width="85" height="18" rx="4" fill="#713f12" stroke="#eab308" strokeWidth="1" />
-                  <text x="402" y="219" fill="#fef08a" fontSize="8.5" fontWeight="bold" fontFamily="monospace" textAnchor="middle">
+                  <circle cx="670" cy="260" r="4.5" fill="#eab308" />
+                  <rect x="360" y="251" width="85" height="18" rx="4" fill="#713f12" stroke="#eab308" strokeWidth="1" />
+                  <text x="402" y="264" fill="#fef08a" fontSize="8.5" fontWeight="bold" fontFamily="monospace" textAnchor="middle">
                     GPIO 21 (SDA)
                   </text>
                 </g>
 
                 {/* WIRE 5: BH1750 SCL (Hijau) ➔ GPIO 22 */}
+                {/* Berakhir TEPAT di x=670 y=242 (Pin SCL sisi kiri box BH1750) */}
                 <g opacity={isBhActive ? 1 : 0.08} className="transition-opacity duration-200">
                   <path
-                    d="M 54 365 C 15 365, 280 235, 490 235 C 580 235, 660 220, 780 220"
+                    d="M 54 365 C 15 365, 270 242, 490 242 C 560 242, 610 242, 670 242"
                     fill="none"
                     stroke="#22c55e"
                     strokeWidth="3.2"
                     strokeLinecap="round"
                   />
                   <circle cx="54" cy="365" r="4.5" fill="#22c55e" />
-                  <circle cx="780" cy="220" r="4.5" fill="#22c55e" />
-                  <rect x="460" y="226" width="85" height="18" rx="4" fill="#14532d" stroke="#22c55e" strokeWidth="1" />
-                  <text x="502" y="239" fill="#bbf7d0" fontSize="8.5" fontWeight="bold" fontFamily="monospace" textAnchor="middle">
+                  <circle cx="670" cy="242" r="4.5" fill="#22c55e" />
+                  <rect x="460" y="233" width="85" height="18" rx="4" fill="#14532d" stroke="#22c55e" strokeWidth="1" />
+                  <text x="502" y="246" fill="#bbf7d0" fontSize="8.5" fontWeight="bold" fontFamily="monospace" textAnchor="middle">
                     GPIO 22 (SCL)
                   </text>
                 </g>
 
                 {/* WIRE 6: Relay VCC Koil (Merah) ➔ VIN 5V */}
+                {/* Berakhir TEPAT di x=620 y=333 (Terminal VCC sisi kiri box Relay) */}
                 <g opacity={isRelayActive ? 1 : 0.08} className="transition-opacity duration-200">
                   <path
-                    d={`M 256 185 C 310 185, 480 ${relayModuleHeight + 110}, 580 ${265 + relayModuleHeight - 20} C 595 ${265 + relayModuleHeight - 20}, 610 ${265 + relayModuleHeight - 20}, 645 ${265 + relayModuleHeight - 20}`}
+                    d="M 256 185 C 330 185, 460 333, 620 333"
                     fill="none"
                     stroke="#ef4444"
                     strokeWidth="2.5"
@@ -552,32 +597,32 @@ export default function WiringSchematicModal({
                     strokeDasharray="6,3"
                   />
                   <circle cx="256" cy="185" r="3.5" fill="#ef4444" />
-                  <circle cx="645" cy={265 + relayModuleHeight - 20} r="3.5" fill="#ef4444" />
+                  <circle cx="620" cy="333" r="3.5" fill="#ef4444" />
                 </g>
 
                 {/* DYNAMIC JUMPER WIRES FOR EVERY LIGHT FROM DATABASE */}
+                {/* Setiap kabel berakhir TEPAT di pin IN masing-masing channel pada sisi kiri box Relay (x=620) */}
                 {effectiveLights.map((light, idx) => {
                   const startY = 405 + idx * 30;
-                  const endX = 620 + 15 + 105 + idx * 48 + 12;
-                  const endY = 265 + relayModuleHeight - 20;
+                  const endY = 285 + 82 + idx * 56 + 20;
                   const pal = LIGHT_PALETTES[idx % LIGHT_PALETTES.length];
-                  const midCurveY = 340 + idx * 32;
+                  const midCurveY = 370 + idx * 32;
 
                   return (
                     <g key={light.id} opacity={isRelayActive ? 1 : 0.08} className="transition-opacity duration-200">
                       <path
-                        d={`M 54 ${startY} C 10 ${startY}, 220 ${midCurveY}, 420 ${midCurveY} C 520 ${midCurveY}, ${endX - 35} ${endY}, ${endX} ${endY}`}
+                        d={`M 54 ${startY} C 10 ${startY}, 220 ${midCurveY}, 420 ${midCurveY} C 490 ${midCurveY}, 560 ${endY}, 620 ${endY}`}
                         fill="none"
                         stroke={pal.stroke}
                         strokeWidth="3.2"
                         strokeLinecap="round"
                       />
                       <circle cx="54" cy={startY} r="4.5" fill={pal.stroke} />
-                      <circle cx={endX} cy={endY} r="4.5" fill={pal.stroke} />
+                      <circle cx={620} cy={endY} r="4.5" fill={pal.stroke} />
 
                       {/* Floating Badge on wire */}
                       <rect
-                        x={250 + idx * 30}
+                        x={250 + idx * 28}
                         y={midCurveY - 10}
                         width="130"
                         height="20"
@@ -587,7 +632,7 @@ export default function WiringSchematicModal({
                         strokeWidth="1"
                       />
                       <text
-                        x={315 + idx * 30}
+                        x={315 + idx * 28}
                         y={midCurveY + 4}
                         fill={pal.text}
                         fontSize="8.5"
