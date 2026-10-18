@@ -151,7 +151,7 @@ export default function LiveTelemetryCharts({ data }: Props) {
                   <span>{latestTemp !== null ? `${latestTemp.toFixed(1)} °C` : "-"}</span>
                 </div>
               </div>
-              <div className="h-44 w-full">
+              <div className="h-44 w-full outline-none select-none [&_*]:outline-none [&_*]:focus:outline-none">
                 <ResponsiveContainer width="100%" height="100%">
                   <AreaChart data={formattedData} margin={{ top: 8, right: 8, left: -14, bottom: 0 }}>
                     <defs>
@@ -206,7 +206,7 @@ export default function LiveTelemetryCharts({ data }: Props) {
                   <span>{latestHum !== null ? `${latestHum.toFixed(1)} %` : "-"}</span>
                 </div>
               </div>
-              <div className="h-44 w-full">
+              <div className="h-44 w-full outline-none select-none [&_*]:outline-none [&_*]:focus:outline-none">
                 <ResponsiveContainer width="100%" height="100%">
                   <AreaChart data={formattedData} margin={{ top: 8, right: 8, left: -14, bottom: 0 }}>
                     <defs>
@@ -261,7 +261,7 @@ export default function LiveTelemetryCharts({ data }: Props) {
                   <span>{latestLight !== null ? `${Math.round(latestLight)} Lux` : "-"}</span>
                 </div>
               </div>
-              <div className="h-44 w-full">
+              <div className="h-44 w-full outline-none select-none [&_*]:outline-none [&_*]:focus:outline-none">
                 <ResponsiveContainer width="100%" height="100%">
                   <AreaChart data={formattedData} margin={{ top: 8, right: 8, left: -14, bottom: 0 }}>
                     <defs>

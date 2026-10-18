@@ -323,12 +323,12 @@ export default function SensorHistoryPage() {
             </div>
           </div>
 
-          <div className="h-56 w-full pt-2">
+          <div className="h-56 w-full pt-2 outline-none select-none [&_*]:outline-none [&_*]:focus:outline-none">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={chartData}>
+              <AreaChart data={chartData} margin={{ top: 8, right: 8, left: -14, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                <XAxis dataKey="time" tick={{ fontSize: 10, fill: "#94a3b8" }} stroke="#cbd5e1" />
-                <YAxis tick={{ fontSize: 10, fill: "#94a3b8" }} stroke="#cbd5e1" domain={["auto", "auto"]} width={32} />
+                <XAxis dataKey="time" tick={{ fontSize: 10, fill: "#94a3b8" }} stroke="#cbd5e1" minTickGap={28} tickLine={false} axisLine={{ stroke: "#e2e8f0" }} />
+                <YAxis tick={{ fontSize: 10, fill: "#94a3b8" }} stroke="#cbd5e1" domain={["auto", "auto"]} width={38} tickLine={false} axisLine={false} tickFormatter={(val) => typeof val === "number" ? val.toFixed(1) : val} />
                 <Tooltip
                   formatter={(val: unknown, name: unknown) => [
                     typeof val === "number" ? val.toFixed(1) : "-",
@@ -336,9 +336,9 @@ export default function SensorHistoryPage() {
                   ]}
                   contentStyle={{ borderRadius: "12px", border: "1px solid #cbd5e1", fontSize: "12px" }}
                 />
-                <Area type="monotone" dataKey="temp" stroke="#f43f5e" fill="#f43f5e" fillOpacity={0.12} strokeWidth={2} />
-                <Area type="monotone" dataKey="humidity" stroke="#3b82f6" fill="#3b82f6" fillOpacity={0.12} strokeWidth={2} />
-                <Area type="monotone" dataKey="light" stroke="#f59e0b" fill="#f59e0b" fillOpacity={0.12} strokeWidth={2} />
+                <Area type="monotone" dataKey="temp" stroke="#f43f5e" fill="#f43f5e" fillOpacity={0.12} strokeWidth={2} isAnimationActive={false} />
+                <Area type="monotone" dataKey="humidity" stroke="#3b82f6" fill="#3b82f6" fillOpacity={0.12} strokeWidth={2} isAnimationActive={false} />
+                <Area type="monotone" dataKey="light" stroke="#f59e0b" fill="#f59e0b" fillOpacity={0.12} strokeWidth={2} isAnimationActive={false} />
               </AreaChart>
             </ResponsiveContainer>
           </div>
