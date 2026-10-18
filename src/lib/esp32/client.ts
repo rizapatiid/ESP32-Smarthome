@@ -165,12 +165,13 @@ export async function fetchEsp32LightState(
 }
 
 /**
- * Kirim perintah kontrol lampu ke ESP32 via POST /api/light
+ * Kirim perintah kontrol lampu ke ESP32 via POST /api/light (Mendukung parameter pin GPIO)
  */
 export async function sendEsp32LightCommand(
   ip: string,
   port = 80,
   targetState: boolean,
+  pin = 2,
   timeoutMs = 4000
 ): Promise<{
   ok: boolean;
@@ -194,7 +195,7 @@ export async function sendEsp32LightCommand(
         "Content-Type": "application/json",
         Accept: "application/json",
       },
-      body: JSON.stringify({ state: targetState }),
+      body: JSON.stringify({ state: targetState, pin }),
     });
 
     clearTimeout(timer);

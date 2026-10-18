@@ -95,6 +95,8 @@ export async function POST(req: Request) {
     }
 
     const targetState = body.state;
+    const pin = typeof body.pin === "number" ? body.pin : 2;
+    const lightName = typeof body.name === "string" && body.name.trim() ? body.name.trim() : `Lampu (GPIO ${pin})`;
     const mode = await getSystemSetting("iot_mode", process.env.IOT_MODE || "simulation");
     const activeDeviceId = await getSystemSetting("active_device_id", "");
 
@@ -118,17 +120,17 @@ export async function POST(req: Request) {
         );
       }
 
-      // Kirim HTTP POST ke ESP32 fisik
-      const res = await sendEsp32LightCommand(device.lastIp, 80, targetState, 4000);
+      // Kirim HTTP POST ke ESP32 fisik dengan target pin GPIO
+      const res = await sendEsp32LightCommand(device.lastIp, 80, targetState, pin, 4000);
 
       if (!res.ok) {
         await logControlCommand({
           deviceId: device.deviceId,
-          command: targetState ? "LAMP_ON" : "LAMP_OFF",
+          command: `${lightName}: ${targetState ? "ON" : "OFF"}`,
           requestedState: targetState,
           confirmedState: null,
           status: "FAILED",
-          errorMessage: res.error || "Gagal konfirmasi dari ESP32",
+          errorMessage: res.error || `Gagal konfirmasi dari ESP32 GPIO ${pin}`,
           isSimulated: false,
         });
 
@@ -147,7 +149,7 @@ export async function POST(req: Request) {
 
       await logControlCommand({
         deviceId: device.deviceId,
-        command: targetState ? "LAMP_ON" : "LAMP_OFF",
+        command: `${lightName}: ${targetState ? "ON" : "OFF"}`,
         requestedState: targetState,
         confirmedState: confirmed,
         status: "SUCCESS",
@@ -158,20 +160,21 @@ export async function POST(req: Request) {
         success: true,
         mode: "real",
         deviceId: device.deviceId,
+        pin,
         state: confirmed,
         confirmedState: confirmed,
         isSimulated: false,
-        message: res.message || "Perintah lampu berhasil dieksekusi dan dikonfirmasi oleh ESP32.",
+        message: res.message || `${lightName} berhasil diubah ke ${confirmed ? "ON" : "OFF"} pada ESP32.`,
       });
     }
 
     // 2. JIKA MODE SIMULASI
-    const simResult = setSimulatedLampState(targetState);
+    const simResult = setSimulatedLampState(targetState, pin);
     await saveDeviceState("sim-esp32-01", true, targetState);
 
     await logControlCommand({
       deviceId: "sim-esp32-01",
-      command: targetState ? "LAMP_ON" : "LAMP_OFF",
+      command: `${lightName}: ${targetState ? "ON" : "OFF"}`,
       requestedState: targetState,
       confirmedState: targetState,
       status: "SUCCESS",
@@ -182,6 +185,7 @@ export async function POST(req: Request) {
       success: true,
       mode: "simulation",
       deviceId: "sim-esp32-01",
+      pin,
       state: simResult.state,
       confirmedState: simResult.confirmedState,
       isSimulated: true,

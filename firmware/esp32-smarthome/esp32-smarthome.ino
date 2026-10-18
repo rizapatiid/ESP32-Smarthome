@@ -140,19 +140,25 @@ void handleSensors() {
   sendJsonResponse(200, response);
 }
 
-// GET /api/light
+// GET /api/light (Opsional query parameter ?pin=X)
 void handleGetLight() {
+  int targetPin = LED_PIN;
+  if (server.hasArg("pin")) {
+    targetPin = server.arg("pin").toInt();
+  }
+
   StaticJsonDocument<256> doc;
   doc["deviceId"] = DEVICE_ID;
-  doc["state"] = lampState;
-  doc["gpio"] = LED_PIN;
+  doc["gpio"] = targetPin;
+  doc["pin"] = targetPin;
+  doc["state"] = (targetPin == LED_PIN) ? lampState : (digitalRead(targetPin) == HIGH);
 
   String response;
   serializeJson(doc, response);
   sendJsonResponse(200, response);
 }
 
-// POST /api/light
+// POST /api/light (Mendukung parameter "pin" / "gpio" dinamis untuk multi-lampu)
 void handlePostLight() {
   if (!server.hasArg("plain")) {
     sendJsonResponse(400, "{\"success\":false,\"error\":\"Body kosong\"}");
@@ -174,16 +180,35 @@ void handlePostLight() {
   }
 
   bool requestedState = docIn["state"];
-  lampState = requestedState;
+  
+  // Baca target pin (default LED_PIN = 2)
+  int targetPin = LED_PIN;
+  if (docIn.containsKey("pin")) {
+    targetPin = docIn["pin"];
+  } else if (docIn.containsKey("gpio")) {
+    targetPin = docIn["gpio"];
+  }
 
-  // Terapkan ke pin hardware
-  digitalWrite(LED_PIN, lampState ? HIGH : LOW);
+  // Validasi batas GPIO ESP32 yang aman (0 - 33)
+  if (targetPin < 0 || targetPin > 33) {
+    sendJsonResponse(400, "{\"success\":false,\"error\":\"Nomor pin GPIO tidak valid (0-33)\"}");
+    return;
+  }
+
+  // Otomatis inisialisasi pin hardware sebagai OUTPUT
+  pinMode(targetPin, OUTPUT);
+  digitalWrite(targetPin, requestedState ? HIGH : LOW);
+
+  if (targetPin == LED_PIN) {
+    lampState = requestedState;
+  }
 
   StaticJsonDocument<256> docOut;
   docOut["success"] = true;
-  docOut["state"] = lampState;
-  docOut["confirmedState"] = lampState;
-  docOut["message"] = lampState ? "LED berhasil dinyalakan" : "LED berhasil dimatikan";
+  docOut["pin"] = targetPin;
+  docOut["state"] = requestedState;
+  docOut["confirmedState"] = requestedState;
+  docOut["message"] = requestedState ? "Lampu berhasil dinyalakan" : "Lampu berhasil dimatikan";
 
   String response;
   serializeJson(docOut, response);

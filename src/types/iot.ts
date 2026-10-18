@@ -36,6 +36,14 @@ export interface LightState {
   isSimulated?: boolean;
 }
 
+export interface SmartLight {
+  id: string;
+  name: string;
+  pin: number;
+  state: boolean;
+  isDefault?: boolean;
+}
+
 export interface ControlLogItem {
   id: number;
   deviceId: string;

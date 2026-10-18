@@ -59,21 +59,30 @@ export function getSimulatedSensorData(): SensorData {
   };
 }
 
-export function getSimulatedLampState(): boolean {
-  return simulatedLampState;
+// Map pin simulasi (default pin 2)
+const simulatedPins: Record<number, boolean> = { 2: false };
+
+export function getSimulatedLampState(pin = 2): boolean {
+  if (typeof simulatedPins[pin] === "boolean") {
+    return simulatedPins[pin];
+  }
+  return pin === 2 ? simulatedLampState : false;
 }
 
-export function setSimulatedLampState(newState: boolean): {
+export function setSimulatedLampState(newState: boolean, pin = 2): {
   success: boolean;
   state: boolean;
   confirmedState: boolean;
   message: string;
 } {
-  simulatedLampState = newState;
+  simulatedPins[pin] = newState;
+  if (pin === 2) {
+    simulatedLampState = newState;
+  }
   return {
     success: true,
-    state: simulatedLampState,
-    confirmedState: simulatedLampState,
-    message: `Lampu simulator berhasil ${simulatedLampState ? "dinyalakan (ON)" : "dimatikan (OFF)"}`,
+    state: newState,
+    confirmedState: newState,
+    message: `Lampu simulator (GPIO ${pin}) berhasil ${newState ? "dinyalakan (ON)" : "dimatikan (OFF)"}`,
   };
 }
