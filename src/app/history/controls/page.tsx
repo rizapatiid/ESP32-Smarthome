@@ -75,36 +75,36 @@ export default function ControlHistoryPage() {
   return (
     <div className="space-y-6">
       {/* Header Halaman */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 bg-white p-5 rounded-2xl border border-slate-200/80 shadow-[0_1px_3px_rgba(0,0,0,0.03)]">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-white p-4 sm:p-5 rounded-2xl border border-slate-200/80 shadow-[0_1px_3px_rgba(0,0,0,0.03)]">
         <div>
-          <div className="flex items-center gap-2.5">
-            <h1 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">
+          <div className="flex flex-wrap items-center gap-2">
+            <h1 className="text-lg sm:text-2xl font-bold text-slate-900 tracking-tight">
               Riwayat Kontrol Aktuator
             </h1>
             <span
-              className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border ${
+              className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold border shrink-0 whitespace-nowrap ${
                 systemMode === "real"
                   ? "bg-emerald-50 text-emerald-800 border-emerald-200"
                   : "bg-amber-50 text-amber-800 border-amber-200"
               }`}
             >
               <span
-                className={`w-2 h-2 rounded-full ${
+                className={`w-1.5 h-1.5 rounded-full ${
                   systemMode === "real" ? "bg-emerald-500 animate-pulse" : "bg-amber-500"
                 }`}
               />
-              {systemMode === "real" ? "Data Riil ESP32" : "Data Simulasi"}
+              {systemMode === "real" ? "Mode Real" : "Mode Simulasi"}
             </span>
           </div>
-          <p className="text-xs sm:text-sm text-slate-500 mt-1">
-            Audit log perintah kendali lampu otomatis disesuaikan dengan mode sistem di Database
+          <p className="text-xs text-slate-500 mt-1">
+            Audit log perintah kendali lampu yang tersimpan di Database
           </p>
         </div>
 
         <button
           onClick={loadLogs}
           disabled={loading}
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow-sm transition disabled:opacity-60 self-start sm:self-auto"
+          className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold shadow-xs transition disabled:opacity-60 active:scale-[0.98] w-full sm:w-auto"
         >
           <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin" : ""}`} />
           <span>Muat Ulang Log</span>
