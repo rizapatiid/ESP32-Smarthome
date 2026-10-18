@@ -17,6 +17,7 @@ export default function DashboardPage() {
   const [lastUpdated, setLastUpdated] = useState<string | null>(null);
   const [errorNotice, setErrorNotice] = useState<string | null>(null);
 
+  const prevModeRef = useRef<string | null>(null);
   const isPollingRef = useRef(false);
 
   // Fungsi fetch data periodik
@@ -27,9 +28,18 @@ export default function DashboardPage() {
     try {
       // 1. Ambil status sistem
       const statusRes = await fetch("/api/status");
+      let currentMode = "simulation";
       if (statusRes.ok) {
         const sJson: SystemStatus = await statusRes.json();
         setStatus(sJson);
+        currentMode = sJson.mode || "simulation";
+
+        // Jika mode berubah dari simulasi ke real (atau sebaliknya), reset titik grafik
+        if (prevModeRef.current !== null && prevModeRef.current !== currentMode) {
+          setChartPoints([]);
+          setSensorData(null);
+        }
+        prevModeRef.current = currentMode;
       }
 
       // 2. Ambil data sensor live
@@ -41,7 +51,7 @@ export default function DashboardPage() {
           setLastUpdated(senJson.data.timestamp || new Date().toISOString());
           setErrorNotice(null);
 
-          // Masukkan ke array titik grafik (simpan 25 titik terakhir)
+          // Masukkan ke array titik grafik
           setChartPoints((prev) => {
             const next = [
               ...prev,
@@ -55,10 +65,12 @@ export default function DashboardPage() {
             return next.length > 25 ? next.slice(next.length - 25) : next;
           });
         } else {
+          setSensorData(null);
           setErrorNotice(senJson.error || "Gagal membaca sensor ESP32");
         }
       } else {
         const errJson = await sensorRes.json().catch(() => ({}));
+        setSensorData(null);
         setErrorNotice(errJson.error || "Sensor tidak dapat diakses");
       }
 
@@ -71,7 +83,7 @@ export default function DashboardPage() {
         }
       }
 
-      // 4. Ambil 5 riwayat kontrol terbaru
+      // 4. Ambil 5 riwayat kontrol terbaru sesuai mode
       const logRes = await fetch("/api/control/history?limit=5");
       if (logRes.ok) {
         const logJson = await logRes.json();
@@ -123,18 +135,24 @@ export default function DashboardPage() {
     }
   };
 
+  const currentMode = status?.mode || "simulation";
+
   return (
     <div className="space-y-6">
       {/* Status Header */}
       <StatusHeader status={status} lastUpdated={lastUpdated} />
 
       {/* Kartu Metrik Sensor */}
-      <MetricCards sensorData={sensorData} error={errorNotice} />
+      <MetricCards
+        sensorData={sensorData}
+        mode={currentMode}
+        error={errorNotice}
+      />
 
       {/* Panel Kontrol Lampu */}
       <LightControlCard
         lampState={lampState}
-        isSimulated={sensorData?.isSimulated ?? true}
+        isSimulated={currentMode === "simulation"}
         onToggle={handleToggleLamp}
       />
 

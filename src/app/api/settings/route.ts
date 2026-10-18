@@ -30,7 +30,7 @@ export async function GET() {
         mode,
         pollIntervalMs: pollInterval,
         discoveryTimeoutMs: discoveryTimeout,
-        activeDeviceId,
+        activeDeviceId: mode === "real" && activeDeviceId === "sim-esp32-01" ? "" : activeDeviceId,
       },
       databaseInfo: {
         status: dbHealth.ok ? "CONNECTED" : "DISCONNECTED",
@@ -59,9 +59,17 @@ export async function POST(req: Request) {
 
     if (body.mode && (body.mode === "simulation" || body.mode === "real")) {
       await setSystemSetting("iot_mode", body.mode);
+
       if (body.mode === "simulation") {
         await setSystemSetting("active_device_id", "sim-esp32-01");
         await updateDeviceStatus("sim-esp32-01", true);
+      } else if (body.mode === "real") {
+        // Jika beralih ke mode real, lepaskan simulator agar tidak mencemari data riil
+        const currentActive = await getSystemSetting("active_device_id", "");
+        if (currentActive === "sim-esp32-01") {
+          await setSystemSetting("active_device_id", "");
+        }
+        await updateDeviceStatus("sim-esp32-01", false);
       }
     }
 
@@ -79,7 +87,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json({
       success: true,
-      message: "Pengaturan sistem berhasil disimpan ke database.",
+      message: "Pengaturan sistem berhasil diperbarui.",
     });
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : String(err);

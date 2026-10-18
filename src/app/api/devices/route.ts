@@ -16,8 +16,8 @@ export async function GET() {
         if (dev.deviceId === "sim-esp32-01") {
           return {
             ...dev,
-            isOnline: true,
-            isActive: activeDeviceId === dev.deviceId || (mode === "simulation" && !activeDeviceId),
+            isOnline: mode === "simulation",
+            isActive: mode === "simulation" && (activeDeviceId === dev.deviceId || !activeDeviceId),
           };
         }
 
@@ -44,7 +44,10 @@ export async function GET() {
     return NextResponse.json({
       success: true,
       mode,
-      activeDeviceId: activeDeviceId || (mode === "simulation" ? "sim-esp32-01" : null),
+      activeDeviceId:
+        mode === "real" && activeDeviceId === "sim-esp32-01"
+          ? null
+          : activeDeviceId || (mode === "simulation" ? "sim-esp32-01" : null),
       devices: verifiedDevices,
     });
   } catch (err: unknown) {

@@ -415,6 +415,7 @@ export async function logControlCommand(data: {
  */
 export async function getControlLogs(options: {
   deviceId?: string;
+  isSimulated?: boolean;
   page?: number;
   limit?: number;
 }): Promise<{
@@ -434,6 +435,11 @@ export async function getControlLogs(options: {
   if (options.deviceId) {
     whereClauses.push("device_id = ?");
     params.push(options.deviceId);
+  }
+
+  if (typeof options.isSimulated === "boolean") {
+    whereClauses.push("is_simulated = ?");
+    params.push(options.isSimulated ? 1 : 0);
   }
 
   const whereStr = whereClauses.length > 0 ? "WHERE " + whereClauses.join(" AND ") : "";

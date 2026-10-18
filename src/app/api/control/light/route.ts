@@ -17,58 +17,66 @@ export const dynamic = "force-dynamic";
 export async function GET() {
   try {
     const mode = await getSystemSetting("iot_mode", process.env.IOT_MODE || "simulation");
-    const activeDeviceId = await getSystemSetting(
-      "active_device_id",
-      mode === "simulation" ? "sim-esp32-01" : ""
-    );
+    const activeDeviceId = await getSystemSetting("active_device_id", "");
 
-    if (mode === "simulation" || activeDeviceId === "sim-esp32-01") {
-      const state = getSimulatedLampState();
+    // 1. JIKA MODE REAL HARDWARE
+    if (mode === "real") {
+      if (!activeDeviceId || activeDeviceId === "sim-esp32-01") {
+        return NextResponse.json({
+          success: false,
+          mode: "real",
+          deviceId: null,
+          state: false,
+          isSimulated: false,
+          error: "Belum ada ESP32 fisik yang terhubung",
+        });
+      }
+
+      const device = await getDeviceById(activeDeviceId);
+      if (!device || !device.lastIp) {
+        return NextResponse.json({
+          success: false,
+          mode: "real",
+          deviceId: activeDeviceId,
+          state: false,
+          isSimulated: false,
+          error: "Perangkat aktif tidak ditemukan",
+        });
+      }
+
+      const res = await fetchEsp32LightState(device.lastIp, 80, 2000);
+      if (!res.ok) {
+        // Ambil status tersimpan terakhir di MySQL jika ESP32 sedang lambat
+        const cached = await getDeviceState(device.deviceId);
+        return NextResponse.json({
+          success: false,
+          mode: "real",
+          deviceId: device.deviceId,
+          state: cached?.lampState || false,
+          isSimulated: false,
+          error: res.error,
+        });
+      }
+
+      await saveDeviceState(device.deviceId, true, Boolean(res.state));
+
       return NextResponse.json({
         success: true,
-        mode: "simulation",
-        deviceId: "sim-esp32-01",
-        state,
-        isSimulated: true,
-      });
-    }
-
-    if (!activeDeviceId) {
-      return NextResponse.json(
-        { success: false, state: false, error: "Belum ada perangkat terhubung" },
-        { status: 400 }
-      );
-    }
-
-    const device = await getDeviceById(activeDeviceId);
-    if (!device || !device.lastIp) {
-      return NextResponse.json(
-        { success: false, state: false, error: "Perangkat aktif tidak ditemukan" },
-        { status: 404 }
-      );
-    }
-
-    const res = await fetchEsp32LightState(device.lastIp, 80, 2000);
-    if (!res.ok) {
-      // Ambil cache state terakhir dari DB jika ESP32 sesaat lambat
-      const cached = await getDeviceState(device.deviceId);
-      return NextResponse.json({
-        success: false,
+        mode: "real",
         deviceId: device.deviceId,
-        state: cached?.lampState || false,
-        error: res.error,
+        state: res.state,
+        isSimulated: false,
       });
     }
 
-    // Perbarui state di DB
-    await saveDeviceState(device.deviceId, true, Boolean(res.state));
-
+    // 2. JIKA MODE SIMULASI
+    const state = getSimulatedLampState();
     return NextResponse.json({
       success: true,
-      mode: "real",
-      deviceId: device.deviceId,
-      state: res.state,
-      isSimulated: false,
+      mode: "simulation",
+      deviceId: "sim-esp32-01",
+      state,
+      isSimulated: true,
     });
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : String(err);
@@ -88,102 +96,96 @@ export async function POST(req: Request) {
 
     const targetState = body.state;
     const mode = await getSystemSetting("iot_mode", process.env.IOT_MODE || "simulation");
-    const activeDeviceId = await getSystemSetting(
-      "active_device_id",
-      mode === "simulation" ? "sim-esp32-01" : ""
-    );
+    const activeDeviceId = await getSystemSetting("active_device_id", "");
 
-    // 1. KONTROL MODE SIMULASI
-    if (mode === "simulation" || activeDeviceId === "sim-esp32-01") {
-      const simResult = setSimulatedLampState(targetState);
+    // 1. JIKA MODE REAL HARDWARE
+    if (mode === "real") {
+      if (!activeDeviceId || activeDeviceId === "sim-esp32-01") {
+        return NextResponse.json(
+          {
+            success: false,
+            error: "Mode Real Aktif: Tidak ada perangkat ESP32 fisik terhubung. Silakan hubungkan ESP32 fisik di menu Perangkat.",
+          },
+          { status: 400 }
+        );
+      }
 
-      await saveDeviceState("sim-esp32-01", true, targetState);
+      const device = await getDeviceById(activeDeviceId);
+      if (!device || !device.lastIp) {
+        return NextResponse.json(
+          { success: false, error: `Perangkat ${activeDeviceId} tidak memiliki IP terdaftar.` },
+          { status: 404 }
+        );
+      }
 
-      await logControlCommand({
-        deviceId: "sim-esp32-01",
-        command: targetState ? "LAMP_ON" : "LAMP_OFF",
-        requestedState: targetState,
-        confirmedState: targetState,
-        status: "SUCCESS",
-        isSimulated: true,
-      });
+      // Kirim HTTP POST ke ESP32 fisik
+      const res = await sendEsp32LightCommand(device.lastIp, 80, targetState, 4000);
 
-      return NextResponse.json({
-        success: true,
-        mode: "simulation",
-        deviceId: "sim-esp32-01",
-        state: simResult.state,
-        confirmedState: simResult.confirmedState,
-        isSimulated: true,
-        message: simResult.message,
-      });
-    }
+      if (!res.ok) {
+        await logControlCommand({
+          deviceId: device.deviceId,
+          command: targetState ? "LAMP_ON" : "LAMP_OFF",
+          requestedState: targetState,
+          confirmedState: null,
+          status: "FAILED",
+          errorMessage: res.error || "Gagal konfirmasi dari ESP32",
+          isSimulated: false,
+        });
 
-    // 2. KONTROL MODE REAL HARDWARE
-    if (!activeDeviceId) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: "Tidak ada perangkat ESP32 aktif. Silakan hubungkan perangkat terlebih dahulu.",
-        },
-        { status: 400 }
-      );
-    }
+        return NextResponse.json(
+          {
+            success: false,
+            error: `Gagal mengirim perintah ke ESP32: ${res.error}. Perintah tidak dapat dikonfirmasi.`,
+          },
+          { status: 504 }
+        );
+      }
 
-    const device = await getDeviceById(activeDeviceId);
-    if (!device || !device.lastIp) {
-      return NextResponse.json(
-        { success: false, error: `Perangkat ${activeDeviceId} tidak memiliki IP terdaftar.` },
-        { status: 404 }
-      );
-    }
+      const confirmed = res.confirmedState ?? targetState;
 
-    // Kirim HTTP POST ke ESP32
-    const res = await sendEsp32LightCommand(device.lastIp, 80, targetState, 4000);
+      await saveDeviceState(device.deviceId, true, confirmed);
 
-    if (!res.ok) {
-      // Catat kegagalan ke control_logs
       await logControlCommand({
         deviceId: device.deviceId,
         command: targetState ? "LAMP_ON" : "LAMP_OFF",
         requestedState: targetState,
-        confirmedState: null,
-        status: "FAILED",
-        errorMessage: res.error || "Gagal konfirmasi dari ESP32",
+        confirmedState: confirmed,
+        status: "SUCCESS",
         isSimulated: false,
       });
 
-      return NextResponse.json(
-        {
-          success: false,
-          error: `Gagal mengirim perintah ke ESP32: ${res.error}. Perintah tidak dapat dikonfirmasi.`,
-        },
-        { status: 504 }
-      );
+      return NextResponse.json({
+        success: true,
+        mode: "real",
+        deviceId: device.deviceId,
+        state: confirmed,
+        confirmedState: confirmed,
+        isSimulated: false,
+        message: res.message || "Perintah lampu berhasil dieksekusi dan dikonfirmasi oleh ESP32.",
+      });
     }
 
-    // Berhasil dikonfirmasi oleh ESP32
-    const confirmed = res.confirmedState ?? targetState;
-
-    await saveDeviceState(device.deviceId, true, confirmed);
+    // 2. JIKA MODE SIMULASI
+    const simResult = setSimulatedLampState(targetState);
+    await saveDeviceState("sim-esp32-01", true, targetState);
 
     await logControlCommand({
-      deviceId: device.deviceId,
+      deviceId: "sim-esp32-01",
       command: targetState ? "LAMP_ON" : "LAMP_OFF",
       requestedState: targetState,
-      confirmedState: confirmed,
+      confirmedState: targetState,
       status: "SUCCESS",
-      isSimulated: false,
+      isSimulated: true,
     });
 
     return NextResponse.json({
       success: true,
-      mode: "real",
-      deviceId: device.deviceId,
-      state: confirmed,
-      confirmedState: confirmed,
-      isSimulated: false,
-      message: res.message || "Perintah lampu berhasil dieksekusi dan dikonfirmasi oleh ESP32.",
+      mode: "simulation",
+      deviceId: "sim-esp32-01",
+      state: simResult.state,
+      confirmedState: simResult.confirmedState,
+      isSimulated: true,
+      message: simResult.message,
     });
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : String(err);

@@ -13,7 +13,7 @@ import {
   Clock,
   Terminal,
 } from "lucide-react";
-import { ControlLogItem } from "@/types/iot";
+import { ControlLogItem, OperatingMode } from "@/types/iot";
 
 export default function ControlHistoryPage() {
   const [logs, setLogs] = useState<ControlLogItem[]>([]);
@@ -21,8 +21,25 @@ export default function ControlHistoryPage() {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(false);
+  const [systemMode, setSystemMode] = useState<OperatingMode>("simulation");
   const [deviceId, setDeviceId] = useState("");
   const [statusFilter, setStatusFilter] = useState<"all" | "SUCCESS" | "FAILED">("all");
+
+  // Cek mode sistem aktif
+  useEffect(() => {
+    async function checkMode() {
+      try {
+        const res = await fetch("/api/status");
+        if (res.ok) {
+          const json = await res.json();
+          if (json.mode) setSystemMode(json.mode);
+        }
+      } catch (err) {
+        console.warn("Gagal mengecek mode sistem:", err);
+      }
+    }
+    checkMode();
+  }, []);
 
   const loadLogs = useCallback(async () => {
     setLoading(true);
@@ -35,6 +52,7 @@ export default function ControlHistoryPage() {
       const res = await fetch(`/api/control/history?${params.toString()}`);
       if (res.ok) {
         const json = await res.json();
+        if (json.mode) setSystemMode(json.mode);
         let items: ControlLogItem[] = json.data || [];
         if (statusFilter !== "all") {
           items = items.filter((i) => i.status === statusFilter);
@@ -59,11 +77,27 @@ export default function ControlHistoryPage() {
       {/* Header Halaman */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 bg-white p-5 rounded-2xl border border-slate-200/80 shadow-[0_1px_3px_rgba(0,0,0,0.03)]">
         <div>
-          <h1 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">
-            Riwayat Kontrol Aktuator
-          </h1>
+          <div className="flex items-center gap-2.5">
+            <h1 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">
+              Riwayat Kontrol Aktuator
+            </h1>
+            <span
+              className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border ${
+                systemMode === "real"
+                  ? "bg-emerald-50 text-emerald-800 border-emerald-200"
+                  : "bg-amber-50 text-amber-800 border-amber-200"
+              }`}
+            >
+              <span
+                className={`w-2 h-2 rounded-full ${
+                  systemMode === "real" ? "bg-emerald-500 animate-pulse" : "bg-amber-500"
+                }`}
+              />
+              {systemMode === "real" ? "Data Riil ESP32" : "Data Simulasi"}
+            </span>
+          </div>
           <p className="text-xs sm:text-sm text-slate-500 mt-1">
-            Audit log perintah kendali lampu yang terkonfirmasi di database Hostinger MySQL
+            Audit log perintah kendali lampu otomatis disesuaikan dengan mode sistem di Hostinger MySQL
           </p>
         </div>
 
@@ -117,11 +151,16 @@ export default function ControlHistoryPage() {
             <Database className="w-4 h-4 text-blue-600" />
             <span>Tabel control_logs ({total} catatan)</span>
           </div>
+          <span className="text-xs font-semibold text-slate-500">
+            Sumber: {systemMode === "real" ? "ESP32 Hardware" : "Simulator"}
+          </span>
         </div>
 
         {logs.length === 0 ? (
           <div className="py-12 text-center text-slate-400 text-xs">
-            Belum ada catatan perintah kontrol yang sesuai filter.
+            {systemMode === "real"
+              ? "Belum ada catatan perintah kontrol fisik ESP32 di database."
+              : "Belum ada catatan perintah kontrol simulasi di database."}
           </div>
         ) : (
           <div className="overflow-x-auto">

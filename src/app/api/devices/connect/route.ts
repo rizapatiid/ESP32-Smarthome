@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getDeviceById, setSystemSetting, updateDeviceStatus } from "@/lib/database/mysql";
+import { getDeviceById, getSystemSetting, setSystemSetting, updateDeviceStatus } from "@/lib/database/mysql";
 import { fetchEsp32Status } from "@/lib/esp32/client";
 
 export const dynamic = "force-dynamic";
@@ -15,6 +15,8 @@ export async function POST(req: Request) {
       );
     }
 
+    const mode = await getSystemSetting("iot_mode", process.env.IOT_MODE || "simulation");
+
     const device = await getDeviceById(deviceId);
     if (!device) {
       return NextResponse.json(
@@ -25,6 +27,15 @@ export async function POST(req: Request) {
 
     // Jika perangkat virtual simulator
     if (deviceId === "sim-esp32-01") {
+      if (mode === "real") {
+        return NextResponse.json(
+          {
+            success: false,
+            error: "Sistem sedang berada di Mode Real Hardware. Simulator virtual tidak dapat digunakan pada mode real.",
+          },
+          { status: 400 }
+        );
+      }
       await setSystemSetting("active_device_id", deviceId);
       await updateDeviceStatus(deviceId, true);
       return NextResponse.json({

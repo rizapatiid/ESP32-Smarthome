@@ -12,7 +12,6 @@ export async function GET() {
   // Cek database
   const dbHealth = await testDatabaseConnection();
 
-  // Cek active device
   let activeDeviceName: string | null = null;
   let activeDeviceIp: string | null = null;
   let isOnline = false;
@@ -21,7 +20,7 @@ export async function GET() {
     activeDeviceName = "ESP32 Virtual Simulator";
     activeDeviceIp = "127.0.0.1";
     isOnline = true;
-  } else if (activeDeviceId) {
+  } else if (activeDeviceId && activeDeviceId !== "sim-esp32-01") {
     const dev = await getDeviceById(activeDeviceId);
     if (dev) {
       activeDeviceName = dev.name;
@@ -44,7 +43,7 @@ export async function GET() {
       error: dbHealth.error,
     },
     activeDevice: {
-      deviceId: activeDeviceId || null,
+      deviceId: mode === "real" && activeDeviceId === "sim-esp32-01" ? null : activeDeviceId || null,
       deviceName: activeDeviceName,
       ipAddress: activeDeviceIp,
       isOnline,
