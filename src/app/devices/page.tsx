@@ -263,7 +263,7 @@ export default function DevicesPage() {
           {/* Tombol Simpan Program ESP32 */}
           <button
             onClick={handleOpenFirmwareModal}
-            className="inline-flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs shadow-sm transition active:scale-95 whitespace-nowrap"
+            className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-[#0B1220] hover:bg-[#141f36] text-white font-bold text-xs shadow-md shadow-[#0B1220]/25 border border-[#1b2a47]/70 transition active:scale-95 whitespace-nowrap cursor-pointer"
           >
             <FileCode className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
             <span>Program ESP32</span>
@@ -885,7 +885,7 @@ export default function DevicesPage() {
                 <button
                   onClick={handleCopyCode}
                   disabled={firmwareLoading}
-                  className="w-full inline-flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold transition active:scale-95 text-xs cursor-pointer"
+                  className="w-full inline-flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl bg-[#0B1220] hover:bg-[#141f36] text-white font-bold transition active:scale-95 text-xs cursor-pointer shadow-md shadow-[#0B1220]/20 border border-[#1b2a47]/70"
                 >
                   {copied ? (
                     <>
@@ -964,7 +964,7 @@ export default function DevicesPage() {
               </span>
               <button
                 onClick={() => setIsFirmwareModalOpen(false)}
-                className="w-full sm:w-auto ml-auto px-5 py-2 rounded-xl text-xs font-bold text-white bg-slate-900 hover:bg-slate-800 transition active:scale-95 shadow-xs cursor-pointer text-center"
+                className="w-full sm:w-auto ml-auto px-5 py-2 rounded-xl text-xs font-bold text-white bg-[#0B1220] hover:bg-[#141f36] transition active:scale-95 shadow-md shadow-[#0B1220]/20 border border-[#1b2a47]/70 cursor-pointer text-center"
               >
                 Tutup
               </button>
@@ -980,9 +980,9 @@ export default function DevicesPage() {
             {scanState === "scanning" && (
               <>
                 <div className="relative w-20 h-20 mx-auto flex items-center justify-center">
-                  <span className="absolute inset-0 rounded-full bg-blue-500/20 animate-ping duration-1000" />
-                  <span className="absolute inset-2 rounded-full bg-blue-500/30 animate-pulse" />
-                  <span className="relative w-14 h-14 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-600 text-white flex items-center justify-center shadow-lg shadow-blue-500/40">
+                  <span className="absolute inset-0 rounded-full bg-[#0B1220]/15 animate-ping duration-1000" />
+                  <span className="absolute inset-2 rounded-full bg-[#0B1220]/25 animate-pulse" />
+                  <span className="relative w-14 h-14 rounded-full bg-gradient-to-tr from-[#0B1220] via-[#141f36] to-[#1e3355] text-white flex items-center justify-center shadow-lg shadow-[#0B1220]/30 border border-[#1b2a47]/70">
                     <Radio className="w-7 h-7 animate-pulse" />
                   </span>
                 </div>

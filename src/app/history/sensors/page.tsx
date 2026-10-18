@@ -447,8 +447,8 @@ export default function SensorHistoryPage() {
                     <stop offset="95%" stopColor="#f43f5e" stopOpacity={0.0} />
                   </linearGradient>
                   <linearGradient id="histHumGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.25} />
-                    <stop offset="95%" stopColor="#3b82f6" stopOpacity={0.0} />
+                    <stop offset="5%" stopColor="#0B1220" stopOpacity={0.25} />
+                    <stop offset="95%" stopColor="#0B1220" stopOpacity={0.0} />
                   </linearGradient>
                   <linearGradient id="histLightGrad" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%" stopColor="#f59e0b" stopOpacity={0.25} />
@@ -503,7 +503,7 @@ export default function SensorHistoryPage() {
                   <Area
                     type="monotone"
                     dataKey="humidity"
-                    stroke="#3b82f6"
+                    stroke="#0B1220"
                     fill="url(#histHumGrad)"
                     strokeWidth={2}
                     isAnimationActive={false}

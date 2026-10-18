@@ -211,8 +211,8 @@ export default function LiveTelemetryCharts({ data }: Props) {
                   <AreaChart data={formattedData} margin={{ top: 8, right: 8, left: -14, bottom: 0 }}>
                     <defs>
                       <linearGradient id="humGradientNew" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.28} />
-                        <stop offset="95%" stopColor="#3b82f6" stopOpacity={0.0} />
+                        <stop offset="5%" stopColor="#0B1220" stopOpacity={0.28} />
+                        <stop offset="95%" stopColor="#0B1220" stopOpacity={0.0} />
                       </linearGradient>
                     </defs>
                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
@@ -237,7 +237,7 @@ export default function LiveTelemetryCharts({ data }: Props) {
                     <Area
                       type="monotone"
                       dataKey="humidity"
-                      stroke="#3b82f6"
+                      stroke="#0B1220"
                       strokeWidth={2.2}
                       fillOpacity={1}
                       fill="url(#humGradientNew)"

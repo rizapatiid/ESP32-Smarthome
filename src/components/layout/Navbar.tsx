@@ -90,7 +90,7 @@ export default function Navbar() {
           {/* Logo & Brand Identity */}
           <div className="flex items-center gap-3">
             <Link href="/" className="flex items-center gap-2.5 group">
-              <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-blue-700 via-blue-600 to-indigo-500 text-white flex items-center justify-center shadow-md shadow-blue-500/20 group-hover:scale-105 transition-transform duration-200">
+              <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-[#0B1220] via-[#141f36] to-[#1e3355] text-white flex items-center justify-center shadow-md shadow-[#0B1220]/25 group-hover:scale-105 transition-transform duration-200 border border-[#1b2a47]/50">
                 <Sliders className="w-4 h-4" />
               </div>
               <div className="flex flex-col">
@@ -98,7 +98,7 @@ export default function Navbar() {
                   <span className="font-bold text-[17px] text-slate-900 tracking-tight">
                     SmartHome
                   </span>
-                  <span className="px-1.5 py-0.2 rounded-md bg-blue-100/70 text-blue-700 text-[10px] font-extrabold uppercase tracking-wider">
+                  <span className="px-1.5 py-0.2 rounded-md bg-[#0B1220]/10 text-[#0B1220] text-[10px] font-extrabold uppercase tracking-wider">
                     IoT
                   </span>
                 </div>
