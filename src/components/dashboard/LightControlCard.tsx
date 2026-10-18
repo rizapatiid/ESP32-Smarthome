@@ -37,7 +37,7 @@ export default function LightControlCard({ lampState, isSimulated, onToggle }: P
 
   return (
     <div
-      className={`p-6 rounded-2xl border transition-all duration-300 relative overflow-hidden ${
+      className={`p-4 sm:p-6 rounded-2xl border transition-all duration-300 relative overflow-hidden ${
         lampState
           ? "bg-gradient-to-br from-amber-500/[0.08] via-white to-amber-500/[0.03] border-amber-300/80 shadow-[0_4px_20px_rgba(245,158,11,0.12)]"
           : "bg-white border-slate-200/80 shadow-[0_1px_3px_rgba(0,0,0,0.03)]"
@@ -45,48 +45,55 @@ export default function LightControlCard({ lampState, isSimulated, onToggle }: P
     >
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         {/* Left Info & Visual Icon */}
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3.5 sm:gap-4">
           <div
-            className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-all duration-300 relative ${
+            className={`w-12 h-12 sm:w-14 sm:h-14 rounded-2xl flex items-center justify-center transition-all duration-300 shrink-0 relative ${
               lampState
                 ? "bg-gradient-to-tr from-amber-500 to-yellow-400 text-white shadow-lg shadow-amber-500/30 scale-105"
-                : "bg-slate-100 text-slate-400 border border-slate-200"
+                : "bg-slate-100 text-slate-400 border border-slate-200/80"
             }`}
           >
             {lampState && (
               <span className="absolute inset-0 rounded-2xl bg-amber-400/40 animate-ping -z-10" />
             )}
             <Lightbulb
-              className={`w-7 h-7 transition-transform duration-300 ${
-                lampState ? "fill-white text-white drop-shadow" : "stroke-1"
+              className={`w-6 h-6 sm:w-7 sm:h-7 transition-transform duration-300 ${
+                lampState ? "fill-white text-white drop-shadow" : "stroke-[1.8]"
               }`}
             />
           </div>
 
-          <div>
-            <div className="flex items-center gap-2">
-              <h3 className="font-extrabold text-slate-900 text-lg tracking-tight">
-                Kontrol Lampu (LED)
+          <div className="min-w-0">
+            <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
+              <h3 className="font-extrabold text-slate-900 text-base sm:text-lg tracking-tight whitespace-nowrap">
+                Kontrol Lampu
               </h3>
               <span
-                className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
+                className={`inline-flex items-center gap-1 text-[10px] font-bold px-2.5 py-0.5 rounded-full border whitespace-nowrap shrink-0 ${
                   isSimulated
                     ? "bg-amber-50 text-amber-700 border-amber-200"
                     : "bg-emerald-50 text-emerald-700 border-emerald-200"
                 }`}
               >
-                {isSimulated ? "SIMULASI" : "ESP32 HARDWARE"}
+                <span
+                  className={`w-1.5 h-1.5 rounded-full ${
+                    isSimulated ? "bg-amber-500" : "bg-emerald-500 animate-pulse"
+                  }`}
+                />
+                {isSimulated ? "Simulasi" : "ESP32 Real"}
               </span>
             </div>
-            <p className="text-xs text-slate-500 mt-0.5 flex items-center gap-1.5 font-medium">
-              <Zap className="w-3 h-3 text-amber-500" />
-              <span>Simulasi Aktuator • ESP32 Pin GPIO 2</span>
+            <p className="text-xs text-slate-500 mt-0.5 flex items-center gap-1.5 font-medium truncate">
+              <Zap className="w-3 h-3 text-amber-500 shrink-0" />
+              <span>
+                {isSimulated ? "Aktuator Virtual • Simulator Cerdas" : "Aktuator Fisik • ESP32 GPIO 2"}
+              </span>
             </p>
           </div>
         </div>
 
         {/* Right Status Badge & Big Toggle Button */}
-        <div className="flex items-center gap-3 self-end sm:self-auto">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3 w-full sm:w-auto pt-1 sm:pt-0">
           <div className="text-right hidden sm:block">
             <span className="text-[11px] font-semibold text-slate-400 block uppercase tracking-wider">
               Kondisi Aktuator
@@ -103,20 +110,20 @@ export default function LightControlCard({ lampState, isSimulated, onToggle }: P
           <button
             onClick={handleToggle}
             disabled={loading}
-            className={`relative inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl text-sm font-bold transition-all duration-200 shadow-md ${
+            className={`w-full sm:w-auto relative inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl text-sm font-bold transition-all duration-200 shadow-md ${
               lampState
-                ? "bg-gradient-to-r from-rose-600 to-rose-700 hover:from-rose-700 hover:to-rose-800 text-white shadow-rose-600/20 active:scale-95"
-                : "bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-blue-600/20 active:scale-95"
+                ? "bg-gradient-to-r from-rose-600 to-rose-700 hover:from-rose-700 hover:to-rose-800 text-white shadow-rose-600/20 active:scale-[0.98]"
+                : "bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-blue-600/20 active:scale-[0.98]"
             } disabled:opacity-60 disabled:cursor-not-allowed`}
           >
             {loading ? (
               <>
-                <Loader2 className="w-4 h-4 animate-spin" />
-                <span>Menunggu ESP32...</span>
+                <Loader2 className="w-4 h-4 animate-spin shrink-0" />
+                <span>Menunggu Konfirmasi...</span>
               </>
             ) : (
               <>
-                <Power className="w-4 h-4" />
+                <Power className="w-4 h-4 shrink-0" />
                 <span>{lampState ? "Matikan Lampu" : "Nyalakan Lampu"}</span>
               </>
             )}
