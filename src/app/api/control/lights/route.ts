@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getSystemSetting, setSystemSetting } from "@/lib/database/mysql";
+import { getSimulatedLampState } from "@/lib/simulation/simulator";
 import { SmartLight } from "@/types/iot";
 
 export const dynamic = "force-dynamic";
@@ -20,20 +21,30 @@ const DEFAULT_LIGHTS: SmartLight[] = [
 export async function GET() {
   try {
     const raw = await getSystemSetting("configured_lights", "");
-    if (!raw) {
-      return NextResponse.json({ success: true, lights: DEFAULT_LIGHTS });
-    }
+    const mode = await getSystemSetting("iot_mode", process.env.IOT_MODE || "simulation");
 
-    try {
-      const parsed: SmartLight[] = JSON.parse(raw);
-      if (Array.isArray(parsed) && parsed.length > 0) {
-        return NextResponse.json({ success: true, lights: parsed });
+    let lights: SmartLight[] = DEFAULT_LIGHTS;
+
+    if (raw) {
+      try {
+        const parsed: SmartLight[] = JSON.parse(raw);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          lights = parsed;
+        }
+      } catch {
+        // Fallback jika JSON rusak
       }
-    } catch {
-      // Fallback jika JSON rusak
     }
 
-    return NextResponse.json({ success: true, lights: DEFAULT_LIGHTS });
+    // Jika mode simulasi, sinkronkan status pin terkini dari simulator engine
+    if (mode === "simulation") {
+      lights = lights.map((l) => ({
+        ...l,
+        state: getSimulatedLampState(l.pin),
+      }));
+    }
+
+    return NextResponse.json({ success: true, lights });
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : String(err);
     return NextResponse.json({ success: false, error: message }, { status: 500 });

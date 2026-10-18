@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import {
   getSystemSetting,
+  setSystemSetting,
   getDeviceById,
   saveDeviceState,
   getDeviceState,
@@ -11,6 +12,7 @@ import {
   setSimulatedLampState,
 } from "@/lib/simulation/simulator";
 import { fetchEsp32LightState, sendEsp32LightCommand } from "@/lib/esp32/client";
+import { SmartLight } from "@/types/iot";
 
 export const dynamic = "force-dynamic";
 
@@ -156,6 +158,32 @@ export async function POST(req: Request) {
         isSimulated: false,
       });
 
+      // Sinkronkan state lampu ke configured_lights di database MySQL
+      try {
+        const rawLights = await getSystemSetting("configured_lights", "");
+        if (rawLights) {
+          const parsed: SmartLight[] = JSON.parse(rawLights);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            let hasUpdated = false;
+            const updated = parsed.map((l) => {
+              const isMatch = body.lightId
+                ? l.id === body.lightId
+                : l.pin === pin || (l.isDefault && pin === 2);
+              if (isMatch) {
+                hasUpdated = true;
+                return { ...l, state: confirmed };
+              }
+              return l;
+            });
+            if (hasUpdated) {
+              await setSystemSetting("configured_lights", JSON.stringify(updated));
+            }
+          }
+        }
+      } catch (e) {
+        console.warn("Gagal sinkronkan status lampu ke configured_lights:", e);
+      }
+
       return NextResponse.json({
         success: true,
         mode: "real",
@@ -180,6 +208,32 @@ export async function POST(req: Request) {
       status: "SUCCESS",
       isSimulated: true,
     });
+
+    // Sinkronkan state lampu ke configured_lights di database MySQL
+    try {
+      const rawLights = await getSystemSetting("configured_lights", "");
+      if (rawLights) {
+        const parsed: SmartLight[] = JSON.parse(rawLights);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          let hasUpdated = false;
+          const updated = parsed.map((l) => {
+            const isMatch = body.lightId
+              ? l.id === body.lightId
+              : l.pin === pin || (l.isDefault && pin === 2);
+            if (isMatch) {
+              hasUpdated = true;
+              return { ...l, state: targetState };
+            }
+            return l;
+          });
+          if (hasUpdated) {
+            await setSystemSetting("configured_lights", JSON.stringify(updated));
+          }
+        }
+      }
+    } catch (e) {
+      console.warn("Gagal sinkronkan status lampu ke configured_lights:", e);
+    }
 
     return NextResponse.json({
       success: true,

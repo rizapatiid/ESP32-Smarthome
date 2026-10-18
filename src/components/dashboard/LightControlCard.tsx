@@ -46,6 +46,18 @@ const AVAILABLE_GPIOS = [
   { pin: 33, label: "GPIO 33 (Pin ADC/IO)" },
 ];
 
+const STORAGE_KEY = "smarthome_configured_lights_v1";
+
+const saveToStorage = (list: SmartLight[]) => {
+  try {
+    if (typeof window !== "undefined") {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+    }
+  } catch (e) {
+    console.warn("Gagal menyimpan ke localStorage:", e);
+  }
+};
+
 export default function LightControlCard({ lampState, isSimulated }: Props) {
   const [lights, setLights] = useState<SmartLight[]>(DEFAULT_LIGHTS);
   const [loadingMap, setLoadingMap] = useState<Record<string, boolean>>({});
@@ -61,38 +73,57 @@ export default function LightControlCard({ lampState, isSimulated }: Props) {
   const [editingLight, setEditingLight] = useState<SmartLight | null>(null);
   const [editNameValue, setEditNameValue] = useState("");
 
-  // Load configured lights from backend
+  // Load configured lights from backend (tidak bergantung pada lampState)
   const loadLights = useCallback(async () => {
     try {
       const res = await fetch("/api/control/lights");
       if (res.ok) {
         const json = await res.json();
         if (Array.isArray(json.lights) && json.lights.length > 0) {
-          // Sinkronkan state lampu utama jika lampState diberikan
-          const synced = json.lights.map((l: SmartLight) => {
-            if (l.isDefault && typeof lampState === "boolean") {
-              return { ...l, state: lampState };
-            }
-            return l;
+          setLights((prev) => {
+            // Server sebagai sumber utama, pertahankan lampu lokal jika belum tersinkron
+            const serverIds = new Set(json.lights.map((l: SmartLight) => l.id));
+            const localOnly = prev.filter((l) => !l.isDefault && !serverIds.has(l.id));
+            const merged = [...json.lights, ...localOnly];
+            saveToStorage(merged);
+            return merged;
           });
-          setLights(synced);
         }
       }
     } catch (err) {
-      console.warn("Gagal memuat daftar lampu:", err);
+      console.warn("Gagal memuat daftar lampu dari server:", err);
     }
-  }, [lampState]);
+  }, []);
 
+  // Inisialisasi awal: pulihkan seketika dari localStorage (anti hilang / anti flicker) lalu load dari server
   useEffect(() => {
+    try {
+      if (typeof window !== "undefined") {
+        const cached = localStorage.getItem(STORAGE_KEY);
+        if (cached) {
+          const parsed = JSON.parse(cached);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            setLights(parsed);
+          }
+        }
+      }
+    } catch {}
+
     loadLights();
   }, [loadLights]);
 
-  // Sync default light state from parent prop
+  // Sinkronkan HANYA status lampu utama (isDefault) ketika ada polling lampState dari parent
   useEffect(() => {
     if (typeof lampState === "boolean") {
-      setLights((prev) =>
-        prev.map((l) => (l.isDefault ? { ...l, state: lampState } : l))
-      );
+      setLights((prev) => {
+        const defaultLight = prev.find((l) => l.isDefault);
+        if (defaultLight && defaultLight.state === lampState) {
+          return prev;
+        }
+        const updated = prev.map((l) => (l.isDefault ? { ...l, state: lampState } : l));
+        saveToStorage(updated);
+        return updated;
+      });
     }
   }, [lampState]);
 
@@ -104,6 +135,13 @@ export default function LightControlCard({ lampState, isSimulated }: Props) {
     setFeedback(null);
 
     const targetState = !light.state;
+
+    // 1. Optimistic update: langsung ubah di UI dan simpan ke localStorage seketika
+    setLights((prev) => {
+      const updated = prev.map((l) => (l.id === light.id ? { ...l, state: targetState } : l));
+      saveToStorage(updated);
+      return updated;
+    });
 
     try {
       const res = await fetch("/api/control/light", {
@@ -120,17 +158,25 @@ export default function LightControlCard({ lampState, isSimulated }: Props) {
       const data = await res.json();
 
       if (res.ok && data.success) {
-        // Update local state
-        setLights((prev) =>
-          prev.map((l) => (l.id === light.id ? { ...l, state: targetState } : l))
-        );
         setFeedback({
           message: `${light.name} berhasil ${targetState ? "dinyalakan" : "dimatikan"}`,
         });
       } else {
+        // Rollback jika gagal
+        setLights((prev) => {
+          const reverted = prev.map((l) => (l.id === light.id ? { ...l, state: light.state } : l));
+          saveToStorage(reverted);
+          return reverted;
+        });
         setFeedback({ error: data.error || `Gagal mengubah status ${light.name}` });
       }
     } catch (err: unknown) {
+      // Rollback jika error koneksi
+      setLights((prev) => {
+        const reverted = prev.map((l) => (l.id === light.id ? { ...l, state: light.state } : l));
+        saveToStorage(reverted);
+        return reverted;
+      });
       setFeedback({
         error: err instanceof Error ? err.message : "Terjadi kesalahan saat kontrol lampu",
       });
@@ -142,31 +188,51 @@ export default function LightControlCard({ lampState, isSimulated }: Props) {
   // Add new lamp
   const handleAddLamp = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newLampName.trim()) return;
+    const trimmedName = newLampName.trim();
+    if (!trimmedName) return;
 
     setModalLoading(true);
+
+    // Buat objek lampu baru secara lokal seketika
+    const newLight: SmartLight = {
+      id: `lamp-${Date.now()}`,
+      name: trimmedName,
+      pin: newLampPin,
+      state: false,
+      isDefault: false,
+    };
+
+    // Langsung masukkan ke state & localStorage agar tidak pernah hilang
+    setLights((prev) => {
+      const updated = [...prev, newLight];
+      saveToStorage(updated);
+      return updated;
+    });
+
+    setIsAddModalOpen(false);
+    setNewLampName("");
+
     try {
       const res = await fetch("/api/control/lights", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           action: "add",
-          name: newLampName.trim(),
+          name: trimmedName,
           pin: newLampPin,
         }),
       });
 
       const json = await res.json();
-      if (res.ok && json.success) {
+      if (res.ok && json.success && Array.isArray(json.lights)) {
         setLights(json.lights);
-        setIsAddModalOpen(false);
-        setNewLampName("");
-        setFeedback({ message: `Lampu "${newLampName.trim()}" berhasil ditambahkan!` });
+        saveToStorage(json.lights);
+        setFeedback({ message: `Lampu "${trimmedName}" berhasil ditambahkan & disimpan permanen!` });
       } else {
-        setFeedback({ error: json.error || "Gagal menambahkan lampu" });
+        setFeedback({ message: `Lampu "${trimmedName}" tersimpan di perangkat lokal.` });
       }
     } catch (err) {
-      setFeedback({ error: "Gagal menghubungi server untuk menambah lampu" });
+      setFeedback({ message: `Lampu "${trimmedName}" tersimpan secara lokal.` });
     } finally {
       setModalLoading(false);
     }
@@ -176,6 +242,13 @@ export default function LightControlCard({ lampState, isSimulated }: Props) {
   const handleDeleteLamp = async (id: string, name: string) => {
     if (!confirm(`Hapus "${name}" dari daftar lampu?`)) return;
 
+    // Optimistic delete
+    setLights((prev) => {
+      const updated = prev.filter((l) => l.id !== id || l.isDefault);
+      saveToStorage(updated);
+      return updated;
+    });
+
     try {
       const res = await fetch("/api/control/lights", {
         method: "POST",
@@ -184,12 +257,13 @@ export default function LightControlCard({ lampState, isSimulated }: Props) {
       });
 
       const json = await res.json();
-      if (res.ok && json.success) {
+      if (res.ok && json.success && Array.isArray(json.lights)) {
         setLights(json.lights);
+        saveToStorage(json.lights);
         setFeedback({ message: `Lampu "${name}" telah dihapus.` });
       }
     } catch (err) {
-      setFeedback({ error: "Gagal menghapus lampu" });
+      setFeedback({ error: "Gagal menghapus lampu dari server" });
     }
   };
 
@@ -197,25 +271,37 @@ export default function LightControlCard({ lampState, isSimulated }: Props) {
   const handleSaveRename = async () => {
     if (!editingLight || !editNameValue.trim()) return;
 
+    const targetId = editingLight.id;
+    const newName = editNameValue.trim();
+
+    // Optimistic rename
+    setLights((prev) => {
+      const updated = prev.map((l) => (l.id === targetId ? { ...l, name: newName } : l));
+      saveToStorage(updated);
+      return updated;
+    });
+
+    setEditingLight(null);
+
     try {
       const res = await fetch("/api/control/lights", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           action: "rename",
-          id: editingLight.id,
-          name: editNameValue.trim(),
+          id: targetId,
+          name: newName,
         }),
       });
 
       const json = await res.json();
-      if (res.ok && json.success) {
+      if (res.ok && json.success && Array.isArray(json.lights)) {
         setLights(json.lights);
-        setEditingLight(null);
-        setFeedback({ message: `Nama lampu berhasil diubah menjadi "${editNameValue.trim()}".` });
+        saveToStorage(json.lights);
+        setFeedback({ message: `Nama lampu berhasil diubah menjadi "${newName}".` });
       }
     } catch (err) {
-      setFeedback({ error: "Gagal menyimpan nama baru lampu" });
+      setFeedback({ error: "Gagal menyimpan nama baru lampu ke database" });
     }
   };
 
