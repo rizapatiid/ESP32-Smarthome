@@ -332,8 +332,8 @@ export default function LightControlCard({ lampState, isSimulated }: Props) {
 
       {/* Grid Kartu Lampu */}
       <div
-        className={`grid gap-3 ${
-          lights.length > 1 ? "grid-cols-1 sm:grid-cols-2" : "grid-cols-1"
+        className={`grid gap-3.5 ${
+          lights.length > 1 ? "grid-cols-1 md:grid-cols-2" : "grid-cols-1"
         }`}
       >
         {lights.map((light) => {
@@ -343,23 +343,23 @@ export default function LightControlCard({ lampState, isSimulated }: Props) {
           return (
             <div
               key={light.id}
-              className={`p-3.5 sm:p-4 rounded-2xl border transition-all duration-300 relative overflow-hidden flex items-center justify-between gap-3 ${
+              className={`p-3.5 sm:p-4 rounded-2xl border transition-all duration-200 relative overflow-hidden flex items-center justify-between gap-3 sm:gap-4 ${
                 isOn
-                  ? "bg-gradient-to-r from-amber-500/[0.08] via-white to-amber-500/[0.04] border-amber-300/80 shadow-[0_4px_16px_rgba(245,158,11,0.1)]"
-                  : "bg-white border-slate-200/80 shadow-[0_1px_3px_rgba(0,0,0,0.03)]"
+                  ? "bg-gradient-to-r from-amber-500/[0.08] via-white to-amber-500/[0.03] border-amber-300/80 shadow-[0_4px_16px_rgba(245,158,11,0.08)]"
+                  : "bg-white border-slate-200 hover:border-slate-300/80 shadow-[0_1px_3px_rgba(0,0,0,0.02)]"
               }`}
             >
-              {/* Left: Icon & Lamp Status */}
-              <div className="flex items-center gap-3 min-w-0">
+              {/* Left: Icon & Lamp Info */}
+              <div className="flex items-center gap-3 sm:gap-3.5 min-w-0 flex-1">
                 <div
-                  className={`w-10 h-10 sm:w-11 sm:h-11 rounded-2xl flex items-center justify-center transition-all duration-300 shrink-0 relative ${
+                  className={`w-11 h-11 sm:w-12 sm:h-12 rounded-2xl flex items-center justify-center transition-all duration-300 shrink-0 relative ${
                     isOn
-                      ? "bg-gradient-to-tr from-amber-500 to-yellow-400 text-white shadow-md shadow-amber-500/30 scale-105"
+                      ? "bg-gradient-to-tr from-amber-500 to-yellow-400 text-white shadow-md shadow-amber-500/25 scale-102"
                       : "bg-slate-100 text-slate-400 border border-slate-200/80"
                   }`}
                 >
                   {isOn && (
-                    <span className="absolute inset-0 rounded-2xl bg-amber-400/40 animate-ping -z-10" />
+                    <span className="absolute inset-0 rounded-2xl bg-amber-400/30 animate-ping -z-10" />
                   )}
                   <Lightbulb
                     className={`w-5 h-5 transition-transform duration-300 ${
@@ -368,77 +368,91 @@ export default function LightControlCard({ lampState, isSimulated }: Props) {
                   />
                 </div>
 
-                <div className="min-w-0">
+                <div className="min-w-0 flex-1">
+                  {/* Nama Lampu & Aksi Edit/Hapus */}
                   <div className="flex items-center gap-1.5">
                     <h3 className="font-bold text-slate-900 text-xs sm:text-sm tracking-tight truncate">
                       {light.name}
                     </h3>
-                    <button
-                      onClick={() => {
-                        setEditingLight(light);
-                        setEditNameValue(light.name);
-                      }}
-                      title="Ubah nama lampu"
-                      className="text-slate-300 hover:text-blue-600 p-0.5 rounded transition"
-                    >
-                      <Pencil className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
-                    </button>
+
+                    <div className="flex items-center gap-0.5 shrink-0">
+                      <button
+                        onClick={() => {
+                          setEditingLight(light);
+                          setEditNameValue(light.name);
+                        }}
+                        title="Ubah nama lampu"
+                        className="p-1 rounded-lg text-slate-400 hover:text-blue-600 hover:bg-slate-100 transition"
+                      >
+                        <Pencil className="w-3 h-3" />
+                      </button>
+
+                      {!light.isDefault && (
+                        <button
+                          onClick={() => handleDeleteLamp(light.id, light.name)}
+                          title="Hapus lampu"
+                          className="p-1 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition"
+                        >
+                          <Trash2 className="w-3 h-3" />
+                        </button>
+                      )}
+                    </div>
                   </div>
 
-                  <div className="flex items-center gap-1.5 mt-0.5">
-                    <span
-                      className={`w-1.5 h-1.5 rounded-full shrink-0 ${
-                        isOn ? "bg-amber-500 animate-pulse" : "bg-slate-400"
-                      }`}
-                    />
-                    <span
-                      className={`text-[11px] font-semibold ${
-                        isOn ? "text-amber-600 font-bold" : "text-slate-400"
-                      }`}
-                    >
-                      {isOn ? "Menyala (ON)" : "Padam (OFF)"}
-                    </span>
-                    <span className="text-[10px] font-mono text-slate-400 border-l border-slate-200 pl-1.5 shrink-0">
+                  {/* Status Baris Tunggal (Tidak Pernah Terpotong / Wrap) */}
+                  <div className="flex items-center gap-2 mt-1 whitespace-nowrap text-xs">
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      <span
+                        className={`w-2 h-2 rounded-full shrink-0 ${
+                          isOn ? "bg-amber-500 animate-pulse" : "bg-slate-300"
+                        }`}
+                      />
+                      <span
+                        className={`font-semibold ${
+                          isOn ? "text-amber-600 font-bold" : "text-slate-500"
+                        }`}
+                      >
+                        {isOn ? "Menyala" : "Padam"}
+                      </span>
+                    </div>
+
+                    <span className="text-slate-300 font-light select-none">·</span>
+
+                    <span className="text-[10px] sm:text-[11px] font-mono text-slate-500 bg-slate-100/90 px-1.5 py-0.5 rounded-md border border-slate-200/70 shrink-0">
                       GPIO {light.pin}
                     </span>
+
+                    {light.isDefault && (
+                      <span className="text-[10px] font-semibold text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded-md border border-blue-200/60 shrink-0 hidden sm:inline">
+                        Utama
+                      </span>
+                    )}
                   </div>
                 </div>
               </div>
 
-              {/* Right: Actions */}
-              <div className="flex items-center gap-1.5 shrink-0">
-                <button
-                  onClick={() => handleToggleLamp(light)}
-                  disabled={isLoading}
-                  className={`inline-flex items-center justify-center gap-1 px-3 sm:px-4 py-2 rounded-xl text-xs font-bold transition-all duration-200 shadow-xs ${
-                    isOn
-                      ? "bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200/80 active:scale-95"
-                      : "bg-blue-600 hover:bg-blue-700 text-white shadow-blue-600/20 active:scale-95"
-                  } disabled:opacity-60 disabled:cursor-not-allowed`}
-                >
-                  {isLoading ? (
-                    <>
-                      <Loader2 className="w-3 h-3 sm:w-3.5 sm:h-3.5 animate-spin" />
-                      <span className="hidden sm:inline">Proses...</span>
-                    </>
-                  ) : (
-                    <>
-                      <Power className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
-                      <span>{isOn ? "Matikan" : "Nyalakan"}</span>
-                    </>
-                  )}
-                </button>
-
-                {!light.isDefault && (
-                  <button
-                    onClick={() => handleDeleteLamp(light.id, light.name)}
-                    title="Hapus lampu"
-                    className="p-2 rounded-xl text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition"
-                  >
-                    <Trash2 className="w-3.5 h-3.5" />
-                  </button>
+              {/* Right: Tombol Saklar Terpasang Seragam di Kanan */}
+              <button
+                onClick={() => handleToggleLamp(light)}
+                disabled={isLoading}
+                className={`w-26 sm:w-28 h-9 sm:h-10 shrink-0 inline-flex items-center justify-center gap-1.5 px-3 rounded-xl text-xs font-bold transition-all duration-200 shadow-xs ${
+                  isOn
+                    ? "bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200/90 active:scale-95"
+                    : "bg-blue-600 hover:bg-blue-700 text-white shadow-blue-600/20 active:scale-95"
+                } disabled:opacity-60 disabled:cursor-not-allowed`}
+              >
+                {isLoading ? (
+                  <>
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    <span>Proses...</span>
+                  </>
+                ) : (
+                  <>
+                    <Power className="w-3.5 h-3.5" />
+                    <span>{isOn ? "Matikan" : "Nyalakan"}</span>
+                  </>
                 )}
-              </div>
+              </button>
             </div>
           );
         })}
