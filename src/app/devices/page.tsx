@@ -22,6 +22,8 @@ import {
   Code2,
   ExternalLink,
   AlertTriangle,
+  ChevronDown,
+  ChevronUp,
 } from "lucide-react";
 import { DeviceInfo } from "@/types/iot";
 
@@ -47,6 +49,10 @@ export default function DevicesPage() {
   const [manualName, setManualName] = useState("ESP32 Living Room");
   const [manualLoading, setManualLoading] = useState(false);
   const [showManualForm, setShowManualForm] = useState(false);
+
+  // Panduan Setup State
+  const [isGuideOpen, setIsGuideOpen] = useState(true);
+  const [activeGuideTab, setActiveGuideTab] = useState<"step1" | "step2" | "step3" | "troubleshooting">("step1");
 
   // Fetch daftar perangkat dari MySQL
   const loadDevices = useCallback(async () => {
@@ -196,41 +202,41 @@ export default function DevicesPage() {
   return (
     <div className="space-y-6">
       {/* Header Halaman */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-white p-5 rounded-2xl border border-slate-200/80 shadow-[0_1px_3px_rgba(0,0,0,0.03)]">
-        <div>
-          <h1 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-white p-4 sm:p-5 rounded-2xl border border-slate-200/80 shadow-[0_1px_3px_rgba(0,0,0,0.03)]">
+        <div className="space-y-0.5">
+          <h1 className="text-lg sm:text-2xl font-black text-slate-900 tracking-tight">
             Manajemen & Penemuan Perangkat
           </h1>
-          <p className="text-xs sm:text-sm text-slate-500 mt-1">
+          <p className="text-xs sm:text-sm text-slate-500">
             Auto Device Discovery melalui UDP Broadcast port 8266 pada jaringan Wi-Fi lokal
           </p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2.5 self-start sm:self-auto">
+        <div className="grid grid-cols-2 gap-2 sm:flex sm:items-center sm:gap-2.5 w-full sm:w-auto">
           {/* Tombol Simpan Program ESP32 */}
           <button
             onClick={handleOpenFirmwareModal}
-            className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs shadow-sm transition active:scale-95"
+            className="inline-flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs shadow-sm transition active:scale-95 whitespace-nowrap"
           >
-            <FileCode className="w-4 h-4 text-emerald-400" />
-            <span>Simpan Program ESP32</span>
+            <FileCode className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+            <span>Program ESP32</span>
           </button>
 
           {/* Tombol Scan ESP32 */}
           <button
             onClick={handleStartScan}
             disabled={scanning}
-            className="inline-flex items-center justify-center gap-2 px-4 sm:px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-md shadow-blue-500/20 transition active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed"
+            className="inline-flex items-center justify-center gap-1.5 px-3.5 sm:px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-md shadow-blue-500/20 transition active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed whitespace-nowrap"
           >
             {scanning ? (
               <>
-                <RefreshCw className="w-4 h-4 animate-spin" />
-                <span>Memindai Wi-Fi...</span>
+                <RefreshCw className="w-3.5 h-3.5 animate-spin shrink-0" />
+                <span>Memindai...</span>
               </>
             ) : (
               <>
-                <Radio className="w-4 h-4" />
-                <span>Scan Perangkat ESP32</span>
+                <Radio className="w-3.5 h-3.5 shrink-0" />
+                <span>Scan ESP32</span>
               </>
             )}
           </button>
@@ -269,23 +275,26 @@ export default function DevicesPage() {
       )}
 
       {/* Grid Daftar Perangkat */}
-      <div className="space-y-3.5">
-        <div className="flex items-center justify-between">
+      <div className="space-y-3">
+        <div className="flex items-center justify-between gap-2">
           <h2 className="text-sm font-bold text-slate-900 flex items-center gap-2">
             <Cpu className="w-4 h-4 text-blue-600" />
-            <span>Perangkat Terdeteksi ({devices.length})</span>
+            <span>Perangkat Terdeteksi</span>
+            <span className="px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 text-xs font-bold font-mono">
+              {devices.length}
+            </span>
           </h2>
-          <span className="text-xs text-slate-400">
-            Divalidasi dari tabel <code className="font-mono bg-slate-100 px-1 py-0.5 rounded">devices</code>
+          <span className="text-[11px] text-slate-400 font-mono bg-slate-100 px-2 py-0.5 rounded-md border border-slate-200/60 hidden sm:inline-block">
+            tabel: devices
           </span>
         </div>
 
         {devices.length === 0 ? (
-          <div className="bg-white p-12 rounded-2xl border border-dashed border-slate-300 text-center space-y-3">
+          <div className="bg-white p-10 rounded-2xl border border-dashed border-slate-300 text-center space-y-3">
             <Radio className="w-10 h-10 text-slate-300 mx-auto stroke-1" />
             <p className="text-sm font-bold text-slate-700">Belum ada perangkat terdeteksi</p>
             <p className="text-xs text-slate-500 max-w-sm mx-auto">
-              Klik tombol <strong>Scan Perangkat ESP32</strong> di atas untuk memindai jaringan lokal secara instan.
+              Klik tombol <strong>Scan ESP32</strong> di atas untuk memindai jaringan lokal secara instan.
             </p>
           </div>
         ) : (
@@ -298,77 +307,83 @@ export default function DevicesPage() {
               return (
                 <div
                   key={device.deviceId}
-                  className={`p-5 rounded-2xl border transition-all ${
+                  className={`p-4 sm:p-5 rounded-2xl border transition-all ${
                     isConnected
-                      ? "bg-gradient-to-br from-blue-50/80 via-white to-indigo-50/20 border-blue-300 ring-2 ring-blue-500/10 shadow-sm"
+                      ? "bg-gradient-to-br from-blue-50/70 via-white to-indigo-50/30 border-blue-300 ring-2 ring-blue-500/10 shadow-sm"
                       : "bg-white border-slate-200/80 hover:border-slate-300 shadow-[0_1px_3px_rgba(0,0,0,0.03)]"
                   }`}
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex items-center gap-3">
                       <div
-                        className={`w-12 h-12 rounded-xl flex items-center justify-center ${
+                        className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 ${
                           isConnected
                             ? "bg-blue-600 text-white shadow-md shadow-blue-500/20"
                             : "bg-slate-100 text-slate-600"
                         }`}
                       >
-                        <Cpu className="w-6 h-6" />
+                        <Cpu className="w-5 h-5" />
                       </div>
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <h3 className="font-bold text-slate-900 text-base">{device.name}</h3>
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <h3 className="font-bold text-slate-900 text-sm sm:text-base truncate">
+                            {device.name}
+                          </h3>
                           {isConnected && (
-                            <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-blue-600 text-white">
+                            <span className="text-[9px] font-extrabold px-1.5 py-0.5 rounded-full bg-blue-600 text-white tracking-wide">
                               AKTIF
                             </span>
                           )}
                         </div>
-                        <span className="text-xs text-slate-500 font-mono block">
+                        <span className="text-[11px] text-slate-400 font-mono block">
                           ID: {device.deviceId}
                         </span>
                       </div>
                     </div>
 
                     <span
-                      className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold ${
+                      className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold shrink-0 ${
                         device.isOnline
                           ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
                           : "bg-slate-100 text-slate-600 border border-slate-200"
                       }`}
                     >
-                      <Wifi className="w-3 h-3" />
+                      <span className={`w-1.5 h-1.5 rounded-full ${device.isOnline ? "bg-emerald-500 animate-pulse" : "bg-slate-400"}`} />
                       {device.isOnline ? "ONLINE" : "OFFLINE"}
                     </span>
                   </div>
 
-                  {/* Metadata Perangkat */}
-                  <div className="mt-4 pt-3.5 border-t border-slate-100 grid grid-cols-2 gap-2 text-xs">
-                    <div>
-                      <span className="text-slate-400 block text-[10px] uppercase font-bold tracking-wider">
+                  {/* Metadata Perangkat (2x2 Micro Cards) */}
+                  <div className="mt-3.5 pt-3 border-t border-slate-100 grid grid-cols-2 gap-2 text-xs">
+                    <div className="p-2 rounded-xl bg-slate-50/80 border border-slate-100">
+                      <span className="text-slate-400 block text-[9px] uppercase font-bold tracking-wider">
                         Alamat IP
                       </span>
-                      <span className="font-mono font-bold text-slate-800">
+                      <span className="font-mono font-bold text-slate-800 text-[11px] truncate block">
                         {device.lastIp || "-"}
                       </span>
                     </div>
-                    <div>
-                      <span className="text-slate-400 block text-[10px] uppercase font-bold tracking-wider">
+                    <div className="p-2 rounded-xl bg-slate-50/80 border border-slate-100">
+                      <span className="text-slate-400 block text-[9px] uppercase font-bold tracking-wider">
                         Tipe Board
                       </span>
-                      <span className="font-semibold text-slate-800">{device.deviceType}</span>
+                      <span className="font-semibold text-slate-800 text-[11px] truncate block">
+                        {device.deviceType}
+                      </span>
                     </div>
-                    <div>
-                      <span className="text-slate-400 block text-[10px] uppercase font-bold tracking-wider">
+                    <div className="p-2 rounded-xl bg-slate-50/80 border border-slate-100">
+                      <span className="text-slate-400 block text-[9px] uppercase font-bold tracking-wider">
                         Versi Firmware
                       </span>
-                      <span className="font-semibold text-slate-800">{device.firmwareVersion || "1.0.0"}</span>
+                      <span className="font-semibold text-slate-800 text-[11px] truncate block">
+                        {device.firmwareVersion || "1.0.0"}
+                      </span>
                     </div>
-                    <div>
-                      <span className="text-slate-400 block text-[10px] uppercase font-bold tracking-wider">
+                    <div className="p-2 rounded-xl bg-slate-50/80 border border-slate-100">
+                      <span className="text-slate-400 block text-[9px] uppercase font-bold tracking-wider">
                         Terakhir Aktif
                       </span>
-                      <span className="text-slate-700">
+                      <span className="text-slate-700 text-[11px] truncate block">
                         {device.lastSeenAt
                           ? new Date(device.lastSeenAt).toLocaleTimeString("id-ID")
                           : "-"}
@@ -377,7 +392,7 @@ export default function DevicesPage() {
                   </div>
 
                   {/* Capabilities Chips */}
-                  <div className="mt-3.5 flex flex-wrap items-center gap-1.5">
+                  <div className="mt-3 flex flex-wrap items-center gap-1.5">
                     {device.capabilities?.map((cap) => (
                       <span
                         key={cap}
@@ -394,11 +409,11 @@ export default function DevicesPage() {
                   </div>
 
                   {/* Aksi Hubungkan / Putuskan */}
-                  <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-end gap-2">
+                  <div className="mt-3.5 pt-3 border-t border-slate-100 flex items-center justify-end">
                     {isConnected ? (
                       <button
                         onClick={handleDisconnect}
-                        className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 transition"
+                        className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 transition"
                       >
                         <Unplug className="w-3.5 h-3.5" />
                         <span>Putuskan Koneksi</span>
@@ -407,7 +422,7 @@ export default function DevicesPage() {
                       <button
                         onClick={() => handleConnect(device.deviceId)}
                         disabled={isConnecting}
-                        className="inline-flex items-center gap-1.5 px-5 py-2 rounded-xl text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 shadow-sm transition disabled:opacity-60"
+                        className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-5 py-2 rounded-xl text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 shadow-sm transition disabled:opacity-60"
                       >
                         {isConnecting ? (
                           <>
@@ -431,174 +446,241 @@ export default function DevicesPage() {
       </div>
 
       {/* Panduan Lengkap Setup & Integrasi ESP32 Fisik */}
-      <div className="bg-white rounded-2xl border border-slate-200/80 shadow-[0_1px_3px_rgba(0,0,0,0.03)] p-5 sm:p-6 space-y-5">
-        {/* Header Panduan */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-b border-slate-100 pb-4">
-          <div>
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center border border-blue-100 shrink-0">
-                <Info className="w-4 h-4" />
-              </div>
-              <h2 className="text-base sm:text-lg font-extrabold text-slate-900 tracking-tight">
-                Panduan Lengkap Setup & Integrasi ESP32 Fisik
+      <div className="bg-white rounded-2xl border border-slate-200/80 shadow-[0_1px_3px_rgba(0,0,0,0.03)] overflow-hidden">
+        {/* Header Panduan dengan Toggle Collapse */}
+        <div className="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-slate-100">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center border border-blue-100 shrink-0">
+              <Info className="w-4 h-4" />
+            </div>
+            <div>
+              <h2 className="text-sm sm:text-base font-extrabold text-slate-900 tracking-tight">
+                Panduan Setup & Integrasi ESP32 Fisik
               </h2>
+              <p className="text-[11px] text-slate-500">
+                Langkah pengkabelan pin, upload firmware, dan deteksi Wi-Fi otomatis.
+              </p>
             </div>
-            <p className="text-xs text-slate-500 mt-1 pl-10">
-              Ikuti 3 tahapan berikut untuk merakit sensor, memprogram firmware, dan menghubungkan ESP32 ke dashboard ini.
-            </p>
           </div>
 
-          <div className="flex items-center gap-2 self-start sm:self-auto pl-10 sm:pl-0">
-            <span className="text-[11px] font-mono font-semibold px-2.5 py-1 rounded-full bg-slate-100 text-slate-600 border border-slate-200">
-              UDP Port 8266 · HTTP Port 80
+          <div className="flex items-center gap-2 justify-between sm:justify-end">
+            <span className="text-[10px] font-mono font-semibold px-2.5 py-1 rounded-full bg-slate-100 text-slate-600 border border-slate-200">
+              UDP: 8266 · HTTP: 80
             </span>
+            <button
+              onClick={() => setIsGuideOpen(!isGuideOpen)}
+              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition"
+            >
+              <span>{isGuideOpen ? "Sembunyikan" : "Buka Panduan"}</span>
+              {isGuideOpen ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+            </button>
           </div>
         </div>
 
-        {/* 3 Langkah Utama (Grid 3 Kolom) */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-          {/* Langkah 1: Wiring Pinout Hardware */}
-          <div className="p-4 rounded-xl bg-slate-50 border border-slate-200/80 space-y-3 flex flex-col justify-between">
-            <div className="space-y-2.5">
-              <div className="flex items-center gap-2">
-                <span className="w-6 h-6 rounded-lg bg-blue-600 text-white font-black text-xs flex items-center justify-center shrink-0">
-                  1
-                </span>
-                <h3 className="font-bold text-slate-900 text-xs sm:text-sm">
-                  Pengkabelan Sensor & Relay
-                </h3>
+        {/* Konten Panduan (Jika Terbuka) */}
+        {isGuideOpen && (
+          <div className="p-4 sm:p-5 space-y-4">
+            {/* Tab Selector di Mobile (< lg) */}
+            <div className="flex lg:hidden items-center p-1 rounded-xl bg-slate-100 text-xs font-semibold overflow-x-auto gap-1">
+              <button
+                onClick={() => setActiveGuideTab("step1")}
+                className={`flex-1 py-1.5 px-2.5 rounded-lg text-center transition whitespace-nowrap text-[11px] ${
+                  activeGuideTab === "step1" ? "bg-white text-blue-700 shadow-xs font-bold" : "text-slate-600"
+                }`}
+              >
+                1. Pinout
+              </button>
+              <button
+                onClick={() => setActiveGuideTab("step2")}
+                className={`flex-1 py-1.5 px-2.5 rounded-lg text-center transition whitespace-nowrap text-[11px] ${
+                  activeGuideTab === "step2" ? "bg-white text-emerald-700 shadow-xs font-bold" : "text-slate-600"
+                }`}
+              >
+                2. Firmware
+              </button>
+              <button
+                onClick={() => setActiveGuideTab("step3")}
+                className={`flex-1 py-1.5 px-2.5 rounded-lg text-center transition whitespace-nowrap text-[11px] ${
+                  activeGuideTab === "step3" ? "bg-white text-indigo-700 shadow-xs font-bold" : "text-slate-600"
+                }`}
+              >
+                3. Wi-Fi
+              </button>
+              <button
+                onClick={() => setActiveGuideTab("troubleshooting")}
+                className={`py-1.5 px-2.5 rounded-lg text-center transition whitespace-nowrap text-[11px] ${
+                  activeGuideTab === "troubleshooting" ? "bg-white text-amber-700 shadow-xs font-bold" : "text-slate-600"
+                }`}
+              >
+                💡 Tips
+              </button>
+            </div>
+
+            {/* Desktop (Grid 3 Kolom) & Mobile (Sesuai Tab Aktif) */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-3.5">
+              {/* Langkah 1: Pinout Hardware */}
+              <div
+                className={`p-3.5 sm:p-4 rounded-xl bg-slate-50 border border-slate-200/80 space-y-2.5 ${
+                  activeGuideTab !== "step1" ? "hidden lg:block" : "block"
+                }`}
+              >
+                <div className="flex items-center gap-2">
+                  <span className="w-5 h-5 rounded-md bg-blue-600 text-white font-black text-[11px] flex items-center justify-center shrink-0">
+                    1
+                  </span>
+                  <h3 className="font-bold text-slate-900 text-xs sm:text-sm">
+                    Pengkabelan Sensor & Relay
+                  </h3>
+                </div>
+                <p className="text-[11px] text-slate-500">
+                  Hubungkan kaki komponen ke pin GPIO ESP32:
+                </p>
+
+                <div className="space-y-1.5 text-xs font-mono">
+                  <div className="flex items-center justify-between p-2 rounded-lg bg-white border border-slate-200/70">
+                    <span className="font-sans font-semibold text-slate-800 text-[11px] flex items-center gap-1.5">
+                      <span className="w-2 h-2 rounded-full bg-blue-500"></span>
+                      DHT22 (Suhu)
+                    </span>
+                    <span className="text-slate-600 text-[11px]">
+                      <span className="px-1.5 py-0.5 rounded bg-blue-50 text-blue-700 font-bold border border-blue-200">GPIO 4</span> · 3.3V
+                    </span>
+                  </div>
+
+                  <div className="flex items-center justify-between p-2 rounded-lg bg-white border border-slate-200/70">
+                    <span className="font-sans font-semibold text-slate-800 text-[11px] flex items-center gap-1.5">
+                      <span className="w-2 h-2 rounded-full bg-amber-500"></span>
+                      BH1750 (Cahaya)
+                    </span>
+                    <span className="text-slate-600 text-[11px]">
+                      SDA <span className="px-1.5 py-0.5 rounded bg-amber-50 text-amber-700 font-bold border border-amber-200">21</span> · SCL <span className="px-1.5 py-0.5 rounded bg-amber-50 text-amber-700 font-bold border border-amber-200">22</span>
+                    </span>
+                  </div>
+
+                  <div className="flex items-center justify-between p-2 rounded-lg bg-white border border-slate-200/70">
+                    <span className="font-sans font-semibold text-slate-800 text-[11px] flex items-center gap-1.5">
+                      <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+                      Relay / Lampu
+                    </span>
+                    <span className="text-slate-600 text-[11px]">
+                      Utama <span className="px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700 font-bold border border-emerald-200">2</span> · Bebas <span className="px-1.5 py-0.5 rounded bg-slate-100 text-slate-700 font-bold border border-slate-200">16, 17</span>
+                    </span>
+                  </div>
+                </div>
               </div>
-              <p className="text-[11px] text-slate-500 leading-relaxed">
-                Hubungkan sensor dan relay ke pin GPIO ESP32 DevKit V1:
-              </p>
 
-              <div className="space-y-1.5 text-[11px] font-mono">
-                <div className="p-2 rounded-lg bg-white border border-slate-200/70">
-                  <span className="font-bold text-blue-600 block text-[10px] uppercase font-sans">
-                    DHT22 (Suhu & Kelembapan)
+              {/* Langkah 2: Upload Firmware Arduino IDE */}
+              <div
+                className={`p-3.5 sm:p-4 rounded-xl bg-slate-50 border border-slate-200/80 space-y-2.5 ${
+                  activeGuideTab !== "step2" ? "hidden lg:block" : "block"
+                }`}
+              >
+                <div className="flex items-center gap-2">
+                  <span className="w-5 h-5 rounded-md bg-emerald-600 text-white font-black text-[11px] flex items-center justify-center shrink-0">
+                    2
                   </span>
-                  <span className="text-slate-700">Data ➔ <strong>GPIO 4</strong> | VCC ➔ 3.3V</span>
+                  <h3 className="font-bold text-slate-900 text-xs sm:text-sm">
+                    Upload Firmware Arduino IDE
+                  </h3>
                 </div>
+                <p className="text-[11px] text-slate-500">
+                  Unggah program firmware ke board ESP32:
+                </p>
 
-                <div className="p-2 rounded-lg bg-white border border-slate-200/70">
-                  <span className="font-bold text-amber-600 block text-[10px] uppercase font-sans">
-                    BH1750 (Sensor Cahaya I2C)
-                  </span>
-                  <span className="text-slate-700">SDA ➔ <strong>GPIO 21</strong> | SCL ➔ <strong>GPIO 22</strong></span>
+                <div className="space-y-2 text-[11px] text-slate-600 leading-relaxed">
+                  <div className="flex items-start gap-1.5">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" />
+                    <span>
+                      Klik <strong>"Program ESP32"</strong> di header atas untuk mengunduh <code className="font-mono bg-white px-1 py-0.5 rounded border text-[10px]">esp32-smarthome.ino</code>.
+                    </span>
+                  </div>
+
+                  <div className="flex items-start gap-1.5">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" />
+                    <span>
+                      Install library di Arduino IDE: <strong className="text-slate-800">DHT sensor, Adafruit Unified, BH1750, ArduinoJson</strong>.
+                    </span>
+                  </div>
+
+                  <div className="flex items-start gap-1.5">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" />
+                    <span>
+                      Pilih Board: <strong>ESP32 Dev Module</strong>, port COM yang aktif, lalu tekan tombol <strong>Upload (➔)</strong>.
+                    </span>
+                  </div>
                 </div>
+              </div>
 
-                <div className="p-2 rounded-lg bg-white border border-slate-200/70">
-                  <span className="font-bold text-emerald-600 block text-[10px] uppercase font-sans">
-                    Lampu & Relay Multi-Pin
+              {/* Langkah 3: Auto-Discovery & Koneksi */}
+              <div
+                className={`p-3.5 sm:p-4 rounded-xl bg-slate-50 border border-slate-200/80 space-y-2.5 ${
+                  activeGuideTab !== "step3" ? "hidden lg:block" : "block"
+                }`}
+              >
+                <div className="flex items-center gap-2">
+                  <span className="w-5 h-5 rounded-md bg-indigo-600 text-white font-black text-[11px] flex items-center justify-center shrink-0">
+                    3
                   </span>
-                  <span className="text-slate-700">Utama ➔ <strong>GPIO 2</strong> | Bebas ➔ <strong>GPIO 16, 17, 18</strong></span>
+                  <h3 className="font-bold text-slate-900 text-xs sm:text-sm">
+                    Deteksi Otomatis & Terhubung
+                  </h3>
+                </div>
+                <p className="text-[11px] text-slate-500">
+                  Sinkronisasi nirkabel melalui Wi-Fi lokal:
+                </p>
+
+                <div className="space-y-2 text-[11px] text-slate-600 leading-relaxed">
+                  <div className="flex items-start gap-1.5">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-indigo-600 shrink-0 mt-0.5" />
+                    <span>
+                      Pastikan ESP32 & Laptop/HP terhubung ke <strong>SSID Wi-Fi yang sama</strong> (frekuensi 2.4 GHz).
+                    </span>
+                  </div>
+
+                  <div className="flex items-start gap-1.5">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-indigo-600 shrink-0 mt-0.5" />
+                    <span>
+                      Buka <strong>Serial Monitor</strong> (115200 baud) untuk memastikan ESP32 sudah mendapat IP lokal.
+                    </span>
+                  </div>
+
+                  <div className="flex items-start gap-1.5">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-indigo-600 shrink-0 mt-0.5" />
+                    <span>
+                      Klik <strong>"Scan ESP32"</strong> di atas, lalu klik <strong>"Hubungkan Perangkat"</strong> untuk kontrol live.
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
 
-          {/* Langkah 2: Upload Firmware Arduino IDE */}
-          <div className="p-4 rounded-xl bg-slate-50 border border-slate-200/80 space-y-3 flex flex-col justify-between">
-            <div className="space-y-2.5">
-              <div className="flex items-center gap-2">
-                <span className="w-6 h-6 rounded-lg bg-emerald-600 text-white font-black text-xs flex items-center justify-center shrink-0">
-                  2
-                </span>
-                <h3 className="font-bold text-slate-900 text-xs sm:text-sm">
-                  Upload Firmware Arduino IDE
-                </h3>
+            {/* Callout Troubleshooting Tips (Desktop selalu tampil di bawah, Mobile tampil saat tab tips dipilih) */}
+            <div
+              className={`p-3.5 sm:p-4 rounded-xl bg-amber-50/70 border border-amber-200/70 text-xs space-y-1.5 ${
+                activeGuideTab !== "troubleshooting" ? "hidden lg:block" : "block"
+              }`}
+            >
+              <div className="flex items-center gap-2 font-bold text-amber-900">
+                <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0" />
+                <span>Tips Pemecahan Masalah (Troubleshooting)</span>
               </div>
-              <p className="text-[11px] text-slate-500 leading-relaxed">
-                Ambil program resmi dan unggah ke chip board ESP32:
-              </p>
-
-              <div className="space-y-2 text-[11px] text-slate-600 leading-relaxed">
-                <div className="flex items-start gap-1.5">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" />
-                  <span>
-                    Klik tombol <strong>"Simpan Program ESP32"</strong> di header atas untuk mengunduh file <code className="font-mono bg-white px-1 py-0.5 rounded border text-[10px]">esp32-smarthome.ino</code>.
-                  </span>
-                </div>
-
-                <div className="flex items-start gap-1.5">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" />
-                  <span>
-                    Install 4 library di Arduino IDE (<em>Tools &gt; Manage Libraries</em>): <strong className="text-slate-800">DHT sensor, Adafruit Unified Sensor, BH1750, ArduinoJson</strong>.
-                  </span>
-                </div>
-
-                <div className="flex items-start gap-1.5">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" />
-                  <span>
-                    Pilih Board: <strong>ESP32 Dev Module</strong>, port COM yang aktif, lalu tekan tombol <strong>Upload (➔)</strong>.
-                  </span>
-                </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1.5 text-[11px] text-amber-800 leading-relaxed pl-6">
+                <p>
+                  • <strong>AP Isolation:</strong> Wi-Fi kantor/publik memblokir komunikasi. Gunakan Wi-Fi rumah atau Hotspot HP.
+                </p>
+                <p>
+                  • <strong>Kabel USB:</strong> Pastikan menggunakan kabel transfer data, bukan kabel charger saja.
+                </p>
+                <p>
+                  • <strong>Firewall:</strong> Beri izin port UDP 8266 pada sistem Windows agar broadcast tidak diblokir.
+                </p>
+                <p>
+                  • <strong>Baudrate:</strong> Gunakan baudrate <code>115200</code> di Serial Monitor Arduino IDE.
+                </p>
               </div>
             </div>
           </div>
-
-          {/* Langkah 3: Auto-Discovery & Koneksi */}
-          <div className="p-4 rounded-xl bg-slate-50 border border-slate-200/80 space-y-3 flex flex-col justify-between">
-            <div className="space-y-2.5">
-              <div className="flex items-center gap-2">
-                <span className="w-6 h-6 rounded-lg bg-indigo-600 text-white font-black text-xs flex items-center justify-center shrink-0">
-                  3
-                </span>
-                <h3 className="font-bold text-slate-900 text-xs sm:text-sm">
-                  Deteksi Otomatis & Terhubung
-                </h3>
-              </div>
-              <p className="text-[11px] text-slate-500 leading-relaxed">
-                Sinkronisasi nirkabel dengan dashboard melalui jaringan Wi-Fi lokal:
-              </p>
-
-              <div className="space-y-2 text-[11px] text-slate-600 leading-relaxed">
-                <div className="flex items-start gap-1.5">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-indigo-600 shrink-0 mt-0.5" />
-                  <span>
-                    Pastikan ESP32 dan laptop/HP terhubung ke <strong>SSID Wi-Fi yang sama</strong> (frekuensi 2.4 GHz).
-                  </span>
-                </div>
-
-                <div className="flex items-start gap-1.5">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-indigo-600 shrink-0 mt-0.5" />
-                  <span>
-                    Buka Serial Monitor (115200 baud) untuk memastikan ESP32 telah mendapatkan alamat IP lokal.
-                  </span>
-                </div>
-
-                <div className="flex items-start gap-1.5">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-indigo-600 shrink-0 mt-0.5" />
-                  <span>
-                    Klik tombol <strong>"Scan Perangkat ESP32"</strong> di header atas, lalu klik <strong>"Hubungkan Perangkat"</strong> untuk mulai kontrol live.
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Callout Troubleshooting Tips */}
-        <div className="p-4 rounded-xl bg-amber-50/70 border border-amber-200/70 text-xs space-y-1.5">
-          <div className="flex items-center gap-2 font-bold text-amber-900">
-            <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0" />
-            <span>Tips Pemecahan Masalah (Troubleshooting)</span>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1 text-[11px] text-amber-800 leading-relaxed pl-6">
-            <p>
-              • <strong>AP Isolation:</strong> Wi-Fi publik / kantor sering memblokir komunikasi antar-perangkat. Jika scan gagal, gunakan Wi-Fi rumah atau Hotspot HP (Tethering).
-            </p>
-            <p>
-              • <strong>Kabel USB:</strong> Pastikan kabel USB yang digunakan adalah kabel transfer data, bukan kabel charger daya saja.
-            </p>
-            <p>
-              • <strong>Firewall:</strong> Izinkan paket UDP Broadcast port 8266 pada sistem operasi Windows agar broadcast tidak diblokir.
-            </p>
-            <p>
-              • <strong>Baudrate:</strong> Gunakan baudrate <code>115200</code> pada Serial Monitor Arduino IDE agar teks log terbaca jelas.
-            </p>
-          </div>
-        </div>
+        )}
       </div>
 
       {/* Modal Simpan Program ESP32 */}
