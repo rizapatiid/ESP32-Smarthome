@@ -26,6 +26,7 @@ import {
   ChevronUp,
   Layers,
   Database,
+  SearchX,
 } from "lucide-react";
 import { DeviceInfo } from "@/types/iot";
 import WiringSchematicModal, { ConfiguredLight } from "@/components/devices/WiringSchematicModal";
@@ -35,12 +36,13 @@ export default function DevicesPage() {
   const [activeDeviceId, setActiveDeviceId] = useState<string | null>(null);
   const [scanning, setScanning] = useState(false);
   const [scanMessage, setScanMessage] = useState<string | null>(null);
+  const [scanStatusType, setScanStatusType] = useState<"found" | "not_found" | "info" | null>(null);
   const [scanError, setScanError] = useState<string | null>(null);
   const [connectingId, setConnectingId] = useState<string | null>(null);
 
   // Scan Popup Modal State
   const [isScanModalOpen, setIsScanModalOpen] = useState(false);
-  const [scanState, setScanState] = useState<"scanning" | "success" | "error">("scanning");
+  const [scanState, setScanState] = useState<"scanning" | "found" | "not_found" | "error">("scanning");
   const [scanResult, setScanResult] = useState<{ count: number; durationMs: number } | null>(null);
 
   // Firmware Modal State
@@ -107,6 +109,7 @@ export default function DevicesPage() {
     setIsScanModalOpen(true);
     setScanState("scanning");
     setScanError(null);
+    setScanStatusType("info");
     setScanMessage("Mengirim UDP Broadcast (255.255.255.255:8266) di jaringan Wi-Fi lokal...");
 
     try {
@@ -118,11 +121,23 @@ export default function DevicesPage() {
 
       const data = await res.json();
       if (res.ok && data.success) {
-        setScanState("success");
-        setScanResult({ count: data.count ?? 0, durationMs: data.durationMs ?? 3500 });
-        setScanMessage(
-          `Pencarian selesai dalam ${data.durationMs}ms. Ditemukan ${data.count} perangkat.`
-        );
+        const count = data.count ?? 0;
+        const durationMs = data.durationMs ?? 3500;
+        setScanResult({ count, durationMs });
+
+        if (count > 0) {
+          setScanState("found");
+          setScanStatusType("found");
+          setScanMessage(
+            `Berhasil menemukan ${count} perangkat ESP32 di jaringan (${durationMs}ms).`
+          );
+        } else {
+          setScanState("not_found");
+          setScanStatusType("not_found");
+          setScanMessage(
+            `Tidak ada perangkat ESP32 yang merespons broadcast UDP (${durationMs}ms).`
+          );
+        }
         await loadDevices();
       } else {
         setScanState("error");
@@ -150,6 +165,7 @@ export default function DevicesPage() {
 
       const data = await res.json();
       if (res.ok && data.success) {
+        setScanStatusType("info");
         setScanMessage(data.message || `Berhasil terhubung ke ${deviceId}`);
         await loadDevices();
       } else {
@@ -221,6 +237,7 @@ export default function DevicesPage() {
       const res = await fetch("/api/devices/disconnect", { method: "POST" });
       if (res.ok) {
         setActiveDeviceId(null);
+        setScanStatusType("info");
         setScanMessage("Koneksi perangkat berhasil diputuskan.");
         await loadDevices();
       }
@@ -275,9 +292,34 @@ export default function DevicesPage() {
 
       {/* Pesan Notifikasi Feedback (Hanya saat popup ditutup) */}
       {scanMessage && !isScanModalOpen && (
-        <div className="flex items-center gap-2 p-3.5 rounded-xl bg-blue-50/80 border border-blue-200 text-blue-900 text-xs font-medium animate-in fade-in duration-150">
-          <CheckCircle2 className="w-4 h-4 shrink-0 text-blue-600" />
-          <span>{scanMessage}</span>
+        <div
+          className={`flex items-center justify-between gap-3 p-3.5 rounded-xl border text-xs font-medium animate-in fade-in duration-150 ${
+            scanStatusType === "found"
+              ? "bg-emerald-50/90 border-emerald-200 text-emerald-900"
+              : scanStatusType === "not_found"
+              ? "bg-amber-50/90 border-amber-200 text-amber-900"
+              : "bg-blue-50/90 border-blue-200 text-blue-900"
+          }`}
+        >
+          <div className="flex items-center gap-2 min-w-0">
+            {scanStatusType === "found" ? (
+              <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-600" />
+            ) : scanStatusType === "not_found" ? (
+              <SearchX className="w-4 h-4 shrink-0 text-amber-600" />
+            ) : (
+              <Info className="w-4 h-4 shrink-0 text-blue-600" />
+            )}
+            <span className="truncate">{scanMessage}</span>
+          </div>
+
+          {scanStatusType === "not_found" && (
+            <button
+              onClick={handleStartScan}
+              className="px-2.5 py-1 rounded-lg bg-amber-600 hover:bg-amber-700 text-white font-bold text-[11px] shrink-0 transition cursor-pointer active:scale-95"
+            >
+              Pindai Ulang
+            </button>
+          )}
         </div>
       )}
 
@@ -968,35 +1010,86 @@ export default function DevicesPage() {
               </>
             )}
 
-            {scanState === "success" && (
+            {/* 2. STATE FOUND (PERANGKAT DITEMUKAN - EMERALD GREEN) */}
+            {scanState === "found" && (
               <>
-                <div className="w-16 h-16 rounded-full bg-emerald-100 text-emerald-600 mx-auto flex items-center justify-center shadow-md shadow-emerald-500/20 animate-in zoom-in-75 duration-200">
+                <div className="w-16 h-16 rounded-full bg-emerald-100 text-emerald-600 mx-auto flex items-center justify-center shadow-lg shadow-emerald-500/25 ring-8 ring-emerald-50 animate-in zoom-in-75 duration-200">
                   <CheckCircle2 className="w-8 h-8" />
                 </div>
 
                 <div className="space-y-1">
-                  <h3 className="font-extrabold text-slate-900 text-base tracking-tight">
-                    Pemindaian Selesai
+                  <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[11px] font-extrabold font-mono tracking-wider">
+                    {scanResult?.count} PERANGKAT DITEMUKAN
+                  </div>
+                  <h3 className="font-black text-slate-900 text-base sm:text-lg tracking-tight">
+                    Pemindaian Berhasil!
                   </h3>
                   <p className="text-xs text-slate-600 leading-relaxed">
-                    {scanResult?.count === 0
-                      ? "Tidak ditemukan perangkat ESP32 baru pada jaringan ini."
-                      : `Berhasil mendeteksi ${scanResult?.count} perangkat ESP32 dalam ${scanResult?.durationMs}ms.`}
+                    Berhasil mendeteksi <strong className="text-emerald-700 font-bold">{scanResult?.count} perangkat ESP32</strong> di jaringan dalam <span className="font-mono">{scanResult?.durationMs}ms</span>.
                   </p>
                 </div>
 
-                <div className="p-2.5 rounded-xl bg-emerald-50 border border-emerald-200 text-xs font-semibold text-emerald-800">
-                  {scanResult?.count === 0
-                    ? "Pastikan ESP32 telah terhubung ke Wi-Fi yang sama"
-                    : "Perangkat siap dikoneksikan ke Database"}
+                <div className="p-2.5 rounded-xl bg-emerald-50 border border-emerald-200/80 text-xs font-semibold text-emerald-900 flex items-center justify-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
+                  <span>Perangkat siap dikoneksikan ke Database</span>
                 </div>
 
                 <button
                   onClick={() => setIsScanModalOpen(false)}
-                  className="w-full py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs shadow-xs transition active:scale-95 cursor-pointer"
+                  className="w-full py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-md shadow-emerald-600/25 transition active:scale-95 cursor-pointer"
                 >
                   Lihat Daftar Perangkat
                 </button>
+              </>
+            )}
+
+            {/* 3. STATE NOT_FOUND (TIDAK DITEMUKAN - AMBER / ORANGE) */}
+            {scanState === "not_found" && (
+              <>
+                <div className="w-16 h-16 rounded-full bg-amber-100 text-amber-600 mx-auto flex items-center justify-center shadow-lg shadow-amber-500/20 ring-8 ring-amber-50 animate-in zoom-in-75 duration-200">
+                  <SearchX className="w-8 h-8" />
+                </div>
+
+                <div className="space-y-1">
+                  <div className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-800 text-[11px] font-extrabold tracking-wider">
+                    0 RESPONS DITERIMA
+                  </div>
+                  <h3 className="font-black text-slate-900 text-base sm:text-lg tracking-tight">
+                    Perangkat Tidak Ditemukan
+                  </h3>
+                  <p className="text-xs text-slate-600 leading-relaxed">
+                    Tidak ada perangkat ESP32 yang merespons broadcast UDP dalam <span className="font-mono">{scanResult?.durationMs}ms</span>.
+                  </p>
+                </div>
+
+                {/* Panduan Pemeriksaan Singkat */}
+                <div className="p-3 rounded-xl bg-amber-50/90 border border-amber-200/80 text-left space-y-1.5 text-xs text-amber-950">
+                  <span className="font-bold text-[11px] uppercase tracking-wider text-amber-900 flex items-center gap-1.5">
+                    <AlertTriangle className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+                    Panduan Cek Cepat:
+                  </span>
+                  <ul className="space-y-1 text-[11px] text-amber-900/90 list-disc list-inside leading-relaxed">
+                    <li>ESP32 &amp; Laptop harus di Wi-Fi yang sama (2.4 GHz).</li>
+                    <li>Cek Serial Monitor Arduino IDE untuk melihat IP ESP32.</li>
+                    <li>Pastikan port UDP 8266 diizinkan pada firewall lokal.</li>
+                  </ul>
+                </div>
+
+                <div className="grid grid-cols-2 gap-2 pt-1">
+                  <button
+                    onClick={handleStartScan}
+                    className="w-full inline-flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs shadow-md shadow-amber-600/20 transition active:scale-95 cursor-pointer"
+                  >
+                    <RefreshCw className="w-3.5 h-3.5" />
+                    <span>Pindai Ulang</span>
+                  </button>
+                  <button
+                    onClick={() => setIsScanModalOpen(false)}
+                    className="w-full py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition active:scale-95 cursor-pointer"
+                  >
+                    Tutup
+                  </button>
+                </div>
               </>
             )}
 
