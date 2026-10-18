@@ -21,6 +21,7 @@ import {
   X,
   Code2,
   ExternalLink,
+  AlertTriangle,
 } from "lucide-react";
 import { DeviceInfo } from "@/types/iot";
 
@@ -429,33 +430,172 @@ export default function DevicesPage() {
         )}
       </div>
 
-      {/* Troubleshooting Info Card */}
-      <div className="p-5 rounded-2xl bg-white border border-slate-200/80 shadow-[0_1px_3px_rgba(0,0,0,0.03)] space-y-3.5">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2 text-slate-900 font-bold text-sm">
-            <Info className="w-4 h-4 text-blue-600" />
-            <span>Panduan Deteksi & Program ESP32</span>
-          </div>
-          <button
-            onClick={handleOpenFirmwareModal}
-            className="inline-flex items-center gap-1.5 text-xs font-bold text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-xl border border-blue-200 transition"
-          >
-            <Download className="w-3.5 h-3.5" />
-            <span>Unduh Program .ino</span>
-          </button>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs text-slate-600">
-          <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-100 space-y-1">
-            <span className="font-bold text-slate-800 block">1. Wi-Fi Jaringan Sama</span>
-            <p className="text-slate-500">
-              ESP32 dan laptop harus terhubung ke SSID Wi-Fi yang sama agar transmisi UDP broadcast port 8266 dapat diterima oleh dashboard.
+      {/* Panduan Lengkap Setup & Integrasi ESP32 Fisik */}
+      <div className="bg-white rounded-2xl border border-slate-200/80 shadow-[0_1px_3px_rgba(0,0,0,0.03)] p-5 sm:p-6 space-y-5">
+        {/* Header Panduan */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-b border-slate-100 pb-4">
+          <div>
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center border border-blue-100 shrink-0">
+                <Info className="w-4 h-4" />
+              </div>
+              <h2 className="text-base sm:text-lg font-extrabold text-slate-900 tracking-tight">
+                Panduan Lengkap Setup & Integrasi ESP32 Fisik
+              </h2>
+            </div>
+            <p className="text-xs text-slate-500 mt-1 pl-10">
+              Ikuti 3 tahapan berikut untuk merakit sensor, memprogram firmware, dan menghubungkan ESP32 ke dashboard ini.
             </p>
           </div>
-          <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-100 space-y-1">
-            <span className="font-bold text-slate-800 block">2. Firmware UDP Port 8266</span>
-            <p className="text-slate-500">
-              Gunakan firmware resmi di <code className="font-mono bg-slate-200 px-1 py-0.5 rounded text-[11px]">firmware/esp32-smarthome</code> yang sudah mendukung multi-lampu dinamis & auto discovery.
+
+          <div className="flex items-center gap-2 self-start sm:self-auto pl-10 sm:pl-0">
+            <span className="text-[11px] font-mono font-semibold px-2.5 py-1 rounded-full bg-slate-100 text-slate-600 border border-slate-200">
+              UDP Port 8266 · HTTP Port 80
+            </span>
+          </div>
+        </div>
+
+        {/* 3 Langkah Utama (Grid 3 Kolom) */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          {/* Langkah 1: Wiring Pinout Hardware */}
+          <div className="p-4 rounded-xl bg-slate-50 border border-slate-200/80 space-y-3 flex flex-col justify-between">
+            <div className="space-y-2.5">
+              <div className="flex items-center gap-2">
+                <span className="w-6 h-6 rounded-lg bg-blue-600 text-white font-black text-xs flex items-center justify-center shrink-0">
+                  1
+                </span>
+                <h3 className="font-bold text-slate-900 text-xs sm:text-sm">
+                  Pengkabelan Sensor & Relay
+                </h3>
+              </div>
+              <p className="text-[11px] text-slate-500 leading-relaxed">
+                Hubungkan sensor dan relay ke pin GPIO ESP32 DevKit V1:
+              </p>
+
+              <div className="space-y-1.5 text-[11px] font-mono">
+                <div className="p-2 rounded-lg bg-white border border-slate-200/70">
+                  <span className="font-bold text-blue-600 block text-[10px] uppercase font-sans">
+                    DHT22 (Suhu & Kelembapan)
+                  </span>
+                  <span className="text-slate-700">Data ➔ <strong>GPIO 4</strong> | VCC ➔ 3.3V</span>
+                </div>
+
+                <div className="p-2 rounded-lg bg-white border border-slate-200/70">
+                  <span className="font-bold text-amber-600 block text-[10px] uppercase font-sans">
+                    BH1750 (Sensor Cahaya I2C)
+                  </span>
+                  <span className="text-slate-700">SDA ➔ <strong>GPIO 21</strong> | SCL ➔ <strong>GPIO 22</strong></span>
+                </div>
+
+                <div className="p-2 rounded-lg bg-white border border-slate-200/70">
+                  <span className="font-bold text-emerald-600 block text-[10px] uppercase font-sans">
+                    Lampu & Relay Multi-Pin
+                  </span>
+                  <span className="text-slate-700">Utama ➔ <strong>GPIO 2</strong> | Bebas ➔ <strong>GPIO 16, 17, 18</strong></span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Langkah 2: Upload Firmware Arduino IDE */}
+          <div className="p-4 rounded-xl bg-slate-50 border border-slate-200/80 space-y-3 flex flex-col justify-between">
+            <div className="space-y-2.5">
+              <div className="flex items-center gap-2">
+                <span className="w-6 h-6 rounded-lg bg-emerald-600 text-white font-black text-xs flex items-center justify-center shrink-0">
+                  2
+                </span>
+                <h3 className="font-bold text-slate-900 text-xs sm:text-sm">
+                  Upload Firmware Arduino IDE
+                </h3>
+              </div>
+              <p className="text-[11px] text-slate-500 leading-relaxed">
+                Ambil program resmi dan unggah ke chip board ESP32:
+              </p>
+
+              <div className="space-y-2 text-[11px] text-slate-600 leading-relaxed">
+                <div className="flex items-start gap-1.5">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" />
+                  <span>
+                    Klik tombol <strong>"Simpan Program ESP32"</strong> di header atas untuk mengunduh file <code className="font-mono bg-white px-1 py-0.5 rounded border text-[10px]">esp32-smarthome.ino</code>.
+                  </span>
+                </div>
+
+                <div className="flex items-start gap-1.5">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" />
+                  <span>
+                    Install 4 library di Arduino IDE (<em>Tools &gt; Manage Libraries</em>): <strong className="text-slate-800">DHT sensor, Adafruit Unified Sensor, BH1750, ArduinoJson</strong>.
+                  </span>
+                </div>
+
+                <div className="flex items-start gap-1.5">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" />
+                  <span>
+                    Pilih Board: <strong>ESP32 Dev Module</strong>, port COM yang aktif, lalu tekan tombol <strong>Upload (➔)</strong>.
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Langkah 3: Auto-Discovery & Koneksi */}
+          <div className="p-4 rounded-xl bg-slate-50 border border-slate-200/80 space-y-3 flex flex-col justify-between">
+            <div className="space-y-2.5">
+              <div className="flex items-center gap-2">
+                <span className="w-6 h-6 rounded-lg bg-indigo-600 text-white font-black text-xs flex items-center justify-center shrink-0">
+                  3
+                </span>
+                <h3 className="font-bold text-slate-900 text-xs sm:text-sm">
+                  Deteksi Otomatis & Terhubung
+                </h3>
+              </div>
+              <p className="text-[11px] text-slate-500 leading-relaxed">
+                Sinkronisasi nirkabel dengan dashboard melalui jaringan Wi-Fi lokal:
+              </p>
+
+              <div className="space-y-2 text-[11px] text-slate-600 leading-relaxed">
+                <div className="flex items-start gap-1.5">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-indigo-600 shrink-0 mt-0.5" />
+                  <span>
+                    Pastikan ESP32 dan laptop/HP terhubung ke <strong>SSID Wi-Fi yang sama</strong> (frekuensi 2.4 GHz).
+                  </span>
+                </div>
+
+                <div className="flex items-start gap-1.5">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-indigo-600 shrink-0 mt-0.5" />
+                  <span>
+                    Buka Serial Monitor (115200 baud) untuk memastikan ESP32 telah mendapatkan alamat IP lokal.
+                  </span>
+                </div>
+
+                <div className="flex items-start gap-1.5">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-indigo-600 shrink-0 mt-0.5" />
+                  <span>
+                    Klik tombol <strong>"Scan Perangkat ESP32"</strong> di header atas, lalu klik <strong>"Hubungkan Perangkat"</strong> untuk mulai kontrol live.
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Callout Troubleshooting Tips */}
+        <div className="p-4 rounded-xl bg-amber-50/70 border border-amber-200/70 text-xs space-y-1.5">
+          <div className="flex items-center gap-2 font-bold text-amber-900">
+            <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0" />
+            <span>Tips Pemecahan Masalah (Troubleshooting)</span>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1 text-[11px] text-amber-800 leading-relaxed pl-6">
+            <p>
+              • <strong>AP Isolation:</strong> Wi-Fi publik / kantor sering memblokir komunikasi antar-perangkat. Jika scan gagal, gunakan Wi-Fi rumah atau Hotspot HP (Tethering).
+            </p>
+            <p>
+              • <strong>Kabel USB:</strong> Pastikan kabel USB yang digunakan adalah kabel transfer data, bukan kabel charger daya saja.
+            </p>
+            <p>
+              • <strong>Firewall:</strong> Izinkan paket UDP Broadcast port 8266 pada sistem operasi Windows agar broadcast tidak diblokir.
+            </p>
+            <p>
+              • <strong>Baudrate:</strong> Gunakan baudrate <code>115200</code> pada Serial Monitor Arduino IDE agar teks log terbaca jelas.
             </p>
           </div>
         </div>
