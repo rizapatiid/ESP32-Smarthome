@@ -757,65 +757,58 @@ export default function DevicesPage() {
 
       {/* Modal Simpan Program ESP32 */}
       {isFirmwareModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-150">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-2.5 sm:p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-150">
           <div className="bg-white rounded-2xl border border-slate-200 shadow-2xl w-full max-w-2xl max-h-[92vh] flex flex-col overflow-hidden">
             {/* Modal Header */}
-            <div className="p-4 sm:p-5 border-b border-slate-100 flex items-center justify-between gap-3 shrink-0">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center border border-emerald-100 shrink-0">
-                  <FileCode className="w-5 h-5" />
+            <div className="p-3.5 sm:p-4 border-b border-slate-100 flex items-center justify-between gap-2.5 shrink-0 bg-slate-50/70">
+              <div className="flex items-center gap-2.5 min-w-0">
+                <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center border border-emerald-100 shrink-0">
+                  <FileCode className="w-4 h-4 sm:w-5 sm:h-5" />
                 </div>
-                <div>
-                  <h3 className="font-bold text-slate-900 text-sm sm:text-base">
+                <div className="min-w-0">
+                  <h3 className="font-extrabold text-slate-900 text-xs sm:text-base tracking-tight truncate">
                     Program Firmware ESP32
                   </h3>
-                  <p className="text-xs text-slate-400 font-mono">
+                  <p className="text-[10px] sm:text-xs text-slate-400 font-mono truncate">
                     esp32-smarthome.ino (Arduino IDE)
                   </p>
                 </div>
               </div>
-
-              <button
-                onClick={() => setIsFirmwareModalOpen(false)}
-                className="text-slate-400 hover:text-slate-600 p-1.5 rounded-xl hover:bg-slate-100 transition"
-              >
-                <X className="w-5 h-5" />
-              </button>
             </div>
 
             {/* Modal Body (Scrollable) */}
-            <div className="p-4 sm:p-5 overflow-y-auto space-y-4 flex-1 text-xs">
+            <div className="p-3.5 sm:p-5 overflow-y-auto space-y-3.5 flex-1 text-xs">
               {/* Highlight Banner */}
-              <div className="p-3.5 rounded-xl bg-emerald-50/80 border border-emerald-200/80 text-emerald-900 space-y-1.5">
-                <div className="flex items-center justify-between flex-wrap gap-2">
-                  <div className="flex items-center gap-1.5 font-bold">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                    <span>Program Siap Diunggah ke ESP32 Fisik</span>
+              <div className="p-3 rounded-xl bg-emerald-50/70 border border-emerald-200/80 text-emerald-900 space-y-1">
+                <div className="flex items-center justify-between flex-wrap gap-1.5">
+                  <div className="flex items-center gap-1.5 font-bold text-xs">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                    <span>Program Siap Diunggah</span>
                   </div>
-                  <span className="text-[10px] font-mono font-bold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-md border border-emerald-300 flex items-center gap-1">
-                    <Database className="w-2.5 h-2.5 text-emerald-600 shrink-0" />
-                    <span>Tersinkron Database: {configuredLights.length} Relay Aktif</span>
+                  <span className="text-[10px] font-mono font-bold bg-white text-emerald-800 px-2 py-0.5 rounded-full border border-emerald-200 shadow-2xs">
+                    {configuredLights.length} Relay Aktif
                   </span>
                 </div>
                 <p className="text-[11px] text-emerald-700 leading-relaxed">
-                  Kode C++ ini sudah otomatis menginjeksi seluruh konfigurasi hardware dari database MySQL: Sensor DHT22 (GPIO 4), BH1750 (I2C 21/22), dan <strong>{configuredLights.length} Pin Relay Lampu</strong> ({configuredLights.map((l) => `${l.name} Pin D${l.pin}`).join(", ")}).
+                  DHT22 (D4), BH1750 (D21/D22), &amp; {configuredLights.length} Relay ({configuredLights.map((l) => `D${l.pin}`).join(", ")}) otomatis diinjeksi dari database MySQL.
                 </p>
               </div>
 
               {/* Wi-Fi Configuration Bar */}
-              <div className="p-4 rounded-xl bg-slate-50 border border-slate-200/80 space-y-2.5">
-                <div className="flex items-center justify-between">
-                  <span className="font-bold text-slate-800 text-xs">
-                    Konfigurasi Wi-Fi Otomatis (Opsional)
+              <div className="p-3.5 sm:p-4 rounded-xl bg-slate-50 border border-slate-200/80 space-y-2">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="font-bold text-slate-800 text-xs flex items-center gap-1.5">
+                    <Wifi className="w-3.5 h-3.5 text-blue-600 shrink-0" />
+                    <span>Konfigurasi Wi-Fi (Opsional)</span>
                   </span>
-                  <span className="text-[10px] text-slate-400">
-                    Otomatis dimasukkan ke file .ino
+                  <span className="text-[10px] text-slate-400 whitespace-nowrap hidden sm:inline">
+                    Otomatis diisi ke file .ino
                   </span>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   <div>
-                    <label className="block text-[11px] font-semibold text-slate-600 mb-1">
+                    <label className="block text-[10px] sm:text-[11px] font-semibold text-slate-600 mb-1">
                       Nama SSID Wi-Fi
                     </label>
                     <input
@@ -823,12 +816,12 @@ export default function DevicesPage() {
                       placeholder="Contoh: MyHome_WiFi"
                       value={customSsid}
                       onChange={(e) => setCustomSsid(e.target.value)}
-                      className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none transition"
+                      className="w-full px-3 py-1.5 sm:py-2 rounded-xl border border-slate-200 bg-white text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none transition"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-[11px] font-semibold text-slate-600 mb-1">
+                    <label className="block text-[10px] sm:text-[11px] font-semibold text-slate-600 mb-1">
                       Password Wi-Fi
                     </label>
                     <input
@@ -836,35 +829,35 @@ export default function DevicesPage() {
                       placeholder="Password Wi-Fi Anda"
                       value={customPassword}
                       onChange={(e) => setCustomPassword(e.target.value)}
-                      className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none transition"
+                      className="w-full px-3 py-1.5 sm:py-2 rounded-xl border border-slate-200 bg-white text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none transition"
                     />
                   </div>
                 </div>
               </div>
 
               {/* Tombol Aksi Simpan & Unduh */}
-              <div className="flex flex-wrap items-center gap-2.5 pt-1">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-0.5">
                 <button
                   onClick={handleDownloadIno}
-                  className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold transition shadow-sm active:scale-95"
+                  className="w-full inline-flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold transition shadow-xs active:scale-95 text-xs cursor-pointer"
                 >
-                  <Download className="w-4 h-4" />
+                  <Download className="w-3.5 h-3.5 shrink-0" />
                   <span>Unduh File (.ino)</span>
                 </button>
 
                 <button
                   onClick={handleCopyCode}
                   disabled={firmwareLoading}
-                  className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold transition active:scale-95"
+                  className="w-full inline-flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold transition active:scale-95 text-xs cursor-pointer"
                 >
                   {copied ? (
                     <>
-                      <Check className="w-4 h-4 text-emerald-400" />
-                      <span className="text-emerald-400">Tersalin ke Clipboard!</span>
+                      <Check className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                      <span className="text-emerald-400">Tersalin!</span>
                     </>
                   ) : (
                     <>
-                      <Copy className="w-4 h-4" />
+                      <Copy className="w-3.5 h-3.5 shrink-0" />
                       <span>Salin Semua Kode</span>
                     </>
                   )}
@@ -872,10 +865,10 @@ export default function DevicesPage() {
 
                 <button
                   onClick={() => setShowCodePreview(!showCodePreview)}
-                  className="inline-flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl text-slate-700 hover:bg-slate-100 font-bold transition border border-slate-200"
+                  className="w-full inline-flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl text-slate-700 hover:bg-slate-100 font-bold transition border border-slate-200 bg-white text-xs cursor-pointer"
                 >
-                  <Code2 className="w-4 h-4 text-slate-500" />
-                  <span>{showCodePreview ? "Sembunyikan Kode" : "Pratinjau Kode"}</span>
+                  <Code2 className="w-3.5 h-3.5 text-slate-500 shrink-0" />
+                  <span>{showCodePreview ? "Tutup Pratinjau" : "Pratinjau Kode"}</span>
                 </button>
               </div>
 
@@ -886,16 +879,16 @@ export default function DevicesPage() {
                     <span>Source: esp32-smarthome.ino</span>
                     <span>{getEffectiveCode().split("\n").length} baris</span>
                   </div>
-                  <pre className="p-4 rounded-xl bg-slate-950 text-slate-200 font-mono text-[11px] leading-relaxed max-h-56 overflow-y-auto border border-slate-800 select-all">
+                  <pre className="p-3.5 rounded-xl bg-slate-950 text-slate-200 font-mono text-[11px] leading-relaxed max-h-56 overflow-y-auto border border-slate-800 select-all">
                     {firmwareLoading ? "Memuat kode firmware dari server..." : getEffectiveCode()}
                   </pre>
                 </div>
               )}
 
               {/* Panduan Langkah Upload ke ESP32 */}
-              <div className="p-4 rounded-xl bg-slate-50 border border-slate-200/80 space-y-2">
+              <div className="p-3.5 sm:p-4 rounded-xl bg-slate-50 border border-slate-200/80 space-y-2">
                 <h4 className="font-bold text-slate-900 flex items-center gap-1.5 text-xs">
-                  <Terminal className="w-3.5 h-3.5 text-blue-600" />
+                  <Terminal className="w-3.5 h-3.5 text-blue-600 shrink-0" />
                   <span>Langkah Mengunggah (Flash) ke Board ESP32</span>
                 </h4>
                 <ol className="list-decimal list-inside space-y-1.5 text-[11px] text-slate-600 leading-relaxed">
@@ -928,13 +921,13 @@ export default function DevicesPage() {
             </div>
 
             {/* Modal Footer */}
-            <div className="p-4 border-t border-slate-100 flex items-center justify-between shrink-0 bg-slate-50/50">
-              <span className="text-[11px] text-slate-400">
-                File tersimpan di: <code>firmware/esp32-smarthome/esp32-smarthome.ino</code>
+            <div className="p-3 sm:p-4 border-t border-slate-100 flex items-center justify-between gap-2 shrink-0 bg-slate-50/60">
+              <span className="text-[11px] text-slate-400 font-mono truncate hidden sm:inline">
+                firmware/esp32-smarthome/esp32-smarthome.ino
               </span>
               <button
                 onClick={() => setIsFirmwareModalOpen(false)}
-                className="px-4 py-2 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-200/60 transition"
+                className="w-full sm:w-auto ml-auto px-5 py-2 rounded-xl text-xs font-bold text-white bg-slate-900 hover:bg-slate-800 transition active:scale-95 shadow-xs cursor-pointer text-center"
               >
                 Tutup
               </button>
