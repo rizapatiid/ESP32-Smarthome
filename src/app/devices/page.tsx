@@ -154,19 +154,17 @@ export default function DevicesPage() {
   // Handler Modal Firmware ESP32
   const handleOpenFirmwareModal = async () => {
     setIsFirmwareModalOpen(true);
-    if (!firmwareCode) {
-      setFirmwareLoading(true);
-      try {
-        const res = await fetch("/api/firmware");
-        const json = await res.json();
-        if (json.success && json.code) {
-          setFirmwareCode(json.code);
-        }
-      } catch (err) {
-        console.warn("Gagal memuat kode firmware:", err);
-      } finally {
-        setFirmwareLoading(false);
+    setFirmwareLoading(true);
+    try {
+      const res = await fetch("/api/firmware");
+      const json = await res.json();
+      if (json.success && json.code) {
+        setFirmwareCode(json.code);
       }
+    } catch (err) {
+      console.warn("Gagal memuat kode firmware:", err);
+    } finally {
+      setFirmwareLoading(false);
     }
   };
 
@@ -788,13 +786,19 @@ export default function DevicesPage() {
             {/* Modal Body (Scrollable) */}
             <div className="p-4 sm:p-5 overflow-y-auto space-y-4 flex-1 text-xs">
               {/* Highlight Banner */}
-              <div className="p-3.5 rounded-xl bg-emerald-50/80 border border-emerald-200/80 text-emerald-900 space-y-1">
-                <div className="flex items-center gap-1.5 font-bold">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                  <span>Program Siap Diunggah ke ESP32 Fisik</span>
+              <div className="p-3.5 rounded-xl bg-emerald-50/80 border border-emerald-200/80 text-emerald-900 space-y-1.5">
+                <div className="flex items-center justify-between flex-wrap gap-2">
+                  <div className="flex items-center gap-1.5 font-bold">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                    <span>Program Siap Diunggah ke ESP32 Fisik</span>
+                  </div>
+                  <span className="text-[10px] font-mono font-bold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-md border border-emerald-300 flex items-center gap-1">
+                    <Database className="w-2.5 h-2.5 text-emerald-600 shrink-0" />
+                    <span>Tersinkron Database: {configuredLights.length} Relay Aktif</span>
+                  </span>
                 </div>
                 <p className="text-[11px] text-emerald-700 leading-relaxed">
-                  Kode ini sudah mencakup Auto Discovery UDP (Port 8266), API Sensor DHT22 & BH1750, serta kontrol multi-lampu dinamis (GPIO 2, 4, 16, dsb.).
+                  Kode C++ ini sudah otomatis menginjeksi seluruh konfigurasi hardware dari database MySQL: Sensor DHT22 (GPIO 4), BH1750 (I2C 21/22), dan <strong>{configuredLights.length} Pin Relay Lampu</strong> ({configuredLights.map((l) => `${l.name} Pin D${l.pin}`).join(", ")}).
                 </p>
               </div>
 
