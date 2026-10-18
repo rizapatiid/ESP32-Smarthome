@@ -13,6 +13,8 @@ import {
   X,
   Sliders,
   Activity,
+  Zap,
+  Sparkles,
 } from "lucide-react";
 import { OperatingMode } from "@/types/iot";
 
@@ -22,8 +24,8 @@ export default function Navbar() {
   const [mode, setMode] = useState<OperatingMode>("simulation");
   const [dbStatus, setDbStatus] = useState<"CONNECTED" | "DISCONNECTED" | "CHECKING">("CHECKING");
   const [dbLatency, setDbLatency] = useState<number | null>(null);
+  const [switchingMode, setSwitchingMode] = useState(false);
 
-  // Periksa status sistem berkala untuk indikator navbar
   useEffect(() => {
     let isMounted = true;
 
@@ -44,12 +46,34 @@ export default function Navbar() {
     }
 
     checkStatus();
-    const interval = setInterval(checkStatus, 6000);
+    const interval = setInterval(checkStatus, 5000);
     return () => {
       isMounted = false;
       clearInterval(interval);
     };
   }, []);
+
+  // Quick mode toggle handler langsung dari navbar
+  const handleToggleMode = async () => {
+    if (switchingMode) return;
+    setSwitchingMode(true);
+    const targetMode = mode === "simulation" ? "real" : "simulation";
+    try {
+      const res = await fetch("/api/settings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ mode: targetMode }),
+      });
+      if (res.ok) {
+        setMode(targetMode);
+        window.location.reload();
+      }
+    } catch (e) {
+      console.error("Gagal toggle mode:", e);
+    } finally {
+      setSwitchingMode(false);
+    }
+  };
 
   const navItems = [
     { href: "/", label: "Dashboard", icon: Home },
@@ -60,28 +84,33 @@ export default function Navbar() {
   ];
 
   return (
-    <header className="sticky top-0 z-40 bg-white/95 backdrop-blur border-b border-slate-200">
+    <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-200/70 transition-all">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
-          {/* Logo Brand */}
+          {/* Logo & Brand Identity */}
           <div className="flex items-center gap-3">
             <Link href="/" className="flex items-center gap-2.5 group">
-              <div className="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center shadow-sm shadow-blue-500/20 group-hover:bg-blue-700 transition">
-                <Sliders className="w-5 h-5" />
+              <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-blue-700 via-blue-600 to-indigo-500 text-white flex items-center justify-center shadow-md shadow-blue-500/20 group-hover:scale-105 transition-transform duration-200">
+                <Sliders className="w-4 h-4" />
               </div>
-              <div>
-                <span className="font-bold text-lg text-slate-900 tracking-tight block leading-tight">
-                  SmartHome <span className="text-blue-600">IoT</span>
-                </span>
-                <span className="text-[11px] text-slate-500 block leading-tight">
-                  ESP32 Wi-Fi & MySQL
+              <div className="flex flex-col">
+                <div className="flex items-center gap-1.5">
+                  <span className="font-bold text-[17px] text-slate-900 tracking-tight">
+                    SmartHome
+                  </span>
+                  <span className="px-1.5 py-0.2 rounded-md bg-blue-100/70 text-blue-700 text-[10px] font-extrabold uppercase tracking-wider">
+                    IoT
+                  </span>
+                </div>
+                <span className="text-[11px] text-slate-500 -mt-0.5 font-medium">
+                  ESP32 • Wi-Fi • Hostinger MySQL
                 </span>
               </div>
             </Link>
           </div>
 
-          {/* Desktop Nav Links */}
-          <nav className="hidden md:flex items-center gap-1">
+          {/* Desktop Nav Items */}
+          <nav className="hidden md:flex items-center gap-1 bg-slate-100/70 p-1 rounded-xl border border-slate-200/50">
             {navItems.map((item) => {
               const Icon = item.icon;
               const isActive =
@@ -90,73 +119,80 @@ export default function Navbar() {
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`flex items-center gap-2 px-3.5 py-2 rounded-lg text-sm font-medium transition ${
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
                     isActive
-                      ? "bg-blue-50 text-blue-700"
-                      : "text-slate-600 hover:text-slate-900 hover:bg-slate-100/80"
+                      ? "bg-white text-slate-900 shadow-sm shadow-slate-200/50"
+                      : "text-slate-600 hover:text-slate-900 hover:bg-white/50"
                   }`}
                 >
-                  <Icon className="w-4 h-4" />
+                  <Icon className={`w-3.5 h-3.5 ${isActive ? "text-blue-600" : "text-slate-400"}`} />
                   {item.label}
                 </Link>
               );
             })}
           </nav>
 
-          {/* Status Badges: Mode & MySQL */}
+          {/* Right Status Controls */}
           <div className="hidden sm:flex items-center gap-2.5">
-            {/* Mode Badge */}
-            <span
-              className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${
+            {/* Quick Mode Switcher Button */}
+            <button
+              onClick={handleToggleMode}
+              disabled={switchingMode}
+              title="Klik untuk beralih mode antara Simulasi dan Real Hardware"
+              className={`group flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border transition-all ${
                 mode === "simulation"
-                  ? "bg-amber-50 text-amber-800 border border-amber-200"
-                  : "bg-emerald-50 text-emerald-800 border border-emerald-200"
+                  ? "bg-amber-50/80 hover:bg-amber-100 text-amber-800 border-amber-200 shadow-sm"
+                  : "bg-emerald-50/80 hover:bg-emerald-100 text-emerald-800 border-emerald-200 shadow-sm"
               }`}
             >
               <span
-                className={`w-1.5 h-1.5 rounded-full ${
+                className={`w-2 h-2 rounded-full ${
                   mode === "simulation" ? "bg-amber-500" : "bg-emerald-500 animate-pulse"
                 }`}
               />
-              {mode === "simulation" ? "MODE SIMULASI" : "MODE REAL ESP32"}
-            </span>
+              <span className="tracking-tight">
+                {mode === "simulation" ? "Mode Simulasi" : "Mode Real ESP32"}
+              </span>
+              <span className="text-[10px] text-slate-400 group-hover:text-slate-600 ml-0.5">
+                (Ganti)
+              </span>
+            </button>
 
-            {/* DB Status Badge */}
-            <span
-              className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border ${
+            {/* Database Health Badge */}
+            <div
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border ${
                 dbStatus === "CONNECTED"
-                  ? "bg-slate-50 text-slate-700 border-slate-200"
+                  ? "bg-white text-slate-700 border-slate-200 shadow-sm"
                   : "bg-rose-50 text-rose-700 border-rose-200"
               }`}
               title="Koneksi Database MySQL Hostinger"
             >
               <Database
                 className={`w-3.5 h-3.5 ${
-                  dbStatus === "CONNECTED" ? "text-blue-600" : "text-rose-600"
+                  dbStatus === "CONNECTED" ? "text-blue-600" : "text-rose-500"
                 }`}
               />
-              <span>
-                {dbStatus === "CONNECTED"
-                  ? `MySQL Online ${dbLatency ? `(${dbLatency}ms)` : ""}`
-                  : "MySQL Offline"}
+              <span className="font-mono text-[11px]">
+                {dbStatus === "CONNECTED" ? `MySQL ${dbLatency ? `${dbLatency}ms` : "OK"}` : "MySQL Offline"}
               </span>
-            </span>
+            </div>
           </div>
 
-          {/* Mobile menu button */}
+          {/* Mobile Menu Button */}
           <div className="flex md:hidden items-center gap-2">
-            <span
-              className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold ${
+            <button
+              onClick={handleToggleMode}
+              className={`px-2.5 py-1 rounded-full text-[11px] font-bold border ${
                 mode === "simulation"
-                  ? "bg-amber-100 text-amber-800"
-                  : "bg-emerald-100 text-emerald-800"
+                  ? "bg-amber-50 text-amber-800 border-amber-200"
+                  : "bg-emerald-50 text-emerald-800 border-emerald-200"
               }`}
             >
-              {mode === "simulation" ? "SIM" : "REAL"}
-            </span>
+              {mode === "simulation" ? "SIMULASI" : "REAL"}
+            </button>
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-2 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100"
+              className="p-2 rounded-xl text-slate-600 hover:text-slate-900 hover:bg-slate-100 border border-slate-200/60"
               aria-label="Toggle menu"
             >
               {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
@@ -167,7 +203,7 @@ export default function Navbar() {
 
       {/* Mobile Drawer */}
       {mobileMenuOpen && (
-        <div className="md:hidden border-b border-slate-200 bg-white px-4 pt-2 pb-4 space-y-1">
+        <div className="md:hidden border-b border-slate-200 bg-white/95 backdrop-blur-md px-4 pt-3 pb-5 space-y-1.5 shadow-lg">
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive =
@@ -177,20 +213,29 @@ export default function Navbar() {
                 key={item.href}
                 href={item.href}
                 onClick={() => setMobileMenuOpen(false)}
-                className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-base font-medium transition ${
+                className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold transition ${
                   isActive
-                    ? "bg-blue-50 text-blue-700"
-                    : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
+                    ? "bg-blue-50 text-blue-700 border border-blue-100"
+                    : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
                 }`}
               >
-                <Icon className="w-5 h-5" />
+                <Icon className={`w-4 h-4 ${isActive ? "text-blue-600" : "text-slate-400"}`} />
                 {item.label}
               </Link>
             );
           })}
-          <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
-            <span>MySQL Hostinger: {dbStatus}</span>
-            <span>Mode: {mode.toUpperCase()}</span>
+
+          <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500 px-1">
+            <span className="flex items-center gap-1.5">
+              <Database className="w-3.5 h-3.5 text-blue-600" />
+              MySQL: {dbStatus}
+            </span>
+            <button
+              onClick={handleToggleMode}
+              className="font-semibold text-blue-600 hover:underline"
+            >
+              Ganti ke {mode === "simulation" ? "Real ESP32" : "Simulasi"}
+            </button>
           </div>
         </div>
       )}
