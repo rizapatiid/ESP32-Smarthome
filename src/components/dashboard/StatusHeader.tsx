@@ -119,7 +119,7 @@ export default function StatusHeader({ status, lastUpdated }: Props) {
             href="/history/sensors"
             className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl text-xs font-semibold text-blue-700 bg-blue-50/70 hover:bg-blue-100/80 border border-blue-200/60 active:scale-[0.98] transition shadow-xs text-center"
           >
-            <span>Riwayat Database</span>
+            <span>Riwayat Aktivitas</span>
             <ExternalLink className="w-3.5 h-3.5 shrink-0" />
           </Link>
         </div>
