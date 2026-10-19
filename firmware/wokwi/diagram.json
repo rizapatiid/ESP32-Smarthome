@@ -4,24 +4,24 @@
   "editor": "wokwi",
   "parts": [
     { "type": "board-esp32-devkit-c-v4", "id": "esp", "top": 0, "left": 0, "attrs": {} },
-    { "type": "wokwi-dht22", "id": "dht1", "top": -120, "left": -120, "attrs": { "temperature": "27.5", "humidity": "64" } },
-    { "type": "wokwi-bh1750", "id": "light1", "top": -120, "left": 120, "attrs": {} },
-    { "type": "wokwi-led", "id": "led1", "top": 180, "left": -80, "attrs": { "color": "green" } },
-    { "type": "wokwi-resistor", "id": "r1", "top": 140, "left": -80, "attrs": { "value": "220" } }
+    { "type": "wokwi-dht22", "id": "dht1", "top": -140, "left": -120, "attrs": { "temperature": "27.5", "humidity": "64" } },
+    { "type": "chip-bh1750", "id": "light1", "top": -140, "left": 130, "attrs": {} },
+    { "type": "wokwi-resistor", "id": "r1", "top": 150, "left": -90, "attrs": { "value": "220" } },
+    { "type": "wokwi-led", "id": "led1", "top": 190, "left": -90, "attrs": { "color": "green" } }
   ],
   "connections": [
     [ "esp:TX", "$serialMonitor:RX", "", [] ],
     [ "esp:RX", "$serialMonitor:TX", "", [] ],
-    [ "esp:3V3", "dht1:VCC", "red", [ "v0" ] ],
-    [ "esp:GND.1", "dht1:GND", "black", [ "v0" ] ],
-    [ "esp:4", "dht1:SDA", "blue", [ "v0" ] ],
-    [ "esp:3V3", "light1:VCC", "red", [ "v0" ] ],
-    [ "esp:GND.2", "light1:GND", "black", [ "v0" ] ],
-    [ "esp:21", "light1:SDA", "green", [ "v0" ] ],
-    [ "esp:22", "light1:SCL", "yellow", [ "v0" ] ],
-    [ "esp:2", "r1:1", "orange", [ "v0" ] ],
+    [ "esp:3V3", "dht1:VCC", "red", [ "v-20", "h-70" ] ],
+    [ "esp:GND.1", "dht1:GND", "black", [ "v-30", "h-50" ] ],
+    [ "esp:4", "dht1:SDA", "blue", [ "v-40", "h-30" ] ],
+    [ "esp:3V3", "light1:VCC", "red", [ "v-20", "h140" ] ],
+    [ "esp:GND.2", "light1:GND", "black", [ "v-30", "h110" ] ],
+    [ "esp:21", "light1:SDA", "green", [ "v-40", "h80" ] ],
+    [ "esp:22", "light1:SCL", "yellow", [ "v-50", "h60" ] ],
+    [ "esp:2", "r1:1", "orange", [ "v20", "h-70" ] ],
     [ "r1:2", "led1:A", "orange", [ "v0" ] ],
-    [ "esp:GND.1", "led1:C", "black", [ "v0" ] ]
+    [ "esp:GND.1", "led1:C", "black", [ "v40", "h-90" ] ]
   ],
   "dependencies": {}
 }

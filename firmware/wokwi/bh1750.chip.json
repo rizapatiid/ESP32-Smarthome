@@ -1,0 +1,21 @@
+{
+  "name": "bh1750",
+  "author": "SmartHome",
+  "pins": [
+    "VCC",
+    "GND",
+    "SCL",
+    "SDA",
+    "ADDR"
+  ],
+  "controls": [
+    {
+      "id": "lux",
+      "type": "slider",
+      "label": "Light (Lux)",
+      "min": 1,
+      "max": 10000,
+      "value": 450
+    }
+  ]
+}
