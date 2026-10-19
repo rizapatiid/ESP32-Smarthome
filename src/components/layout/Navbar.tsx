@@ -134,21 +134,24 @@ export default function Navbar() {
               onClick={handleToggleMode}
               disabled={switchingMode}
               title="Klik untuk beralih mode antara Simulasi dan Real Hardware"
-              className={`group flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border transition-all ${
+              className={`group flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-bold border transition-all active:scale-95 shadow-xs ${
                 mode === "simulation"
-                  ? "bg-amber-50/80 hover:bg-amber-100 text-amber-800 border-amber-200 shadow-sm"
-                  : "bg-emerald-50/80 hover:bg-emerald-100 text-emerald-800 border-emerald-200 shadow-sm"
+                  ? "bg-gradient-to-r from-amber-50 to-amber-100/70 hover:from-amber-100 hover:to-amber-200/80 text-amber-900 border-amber-300 shadow-amber-500/5"
+                  : "bg-gradient-to-r from-emerald-50 to-emerald-100/70 hover:from-emerald-100 hover:to-emerald-200/80 text-emerald-900 border-emerald-300 shadow-emerald-500/5"
               }`}
             >
-              <span
-                className={`w-2 h-2 rounded-full ${
-                  mode === "simulation" ? "bg-amber-500" : "bg-emerald-500 animate-pulse"
-                }`}
-              />
-              <span className="tracking-tight">
-                {mode === "simulation" ? "Mode Simulasi" : "Mode Real ESP32"}
-              </span>
-              <span className="text-[10px] text-slate-400 group-hover:text-slate-600 ml-0.5">
+              {mode === "real" ? (
+                <>
+                  <Cpu className="w-3.5 h-3.5 text-emerald-600 stroke-[2.2]" />
+                  <span className="tracking-tight">Mode Real ESP32</span>
+                </>
+              ) : (
+                <>
+                  <Sparkles className="w-3.5 h-3.5 text-amber-600 stroke-[2.2]" />
+                  <span className="tracking-tight">Mode Simulasi</span>
+                </>
+              )}
+              <span className="text-[10px] text-slate-400 group-hover:text-slate-600 ml-0.5 font-normal">
                 (Ganti)
               </span>
             </button>
@@ -177,17 +180,29 @@ export default function Navbar() {
           <div className="flex md:hidden items-center gap-2">
             <button
               onClick={handleToggleMode}
-              className={`px-2.5 py-1 rounded-full text-[11px] font-bold border ${
+              disabled={switchingMode}
+              title="Klik untuk beralih mode"
+              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-black tracking-wider uppercase border transition-all active:scale-95 shadow-xs ${
                 mode === "simulation"
-                  ? "bg-amber-50 text-amber-800 border-amber-200"
-                  : "bg-emerald-50 text-emerald-800 border-emerald-200"
+                  ? "bg-gradient-to-r from-amber-50 to-amber-100/80 hover:from-amber-100 text-amber-800 border-amber-300 shadow-amber-500/10"
+                  : "bg-gradient-to-r from-emerald-50 to-emerald-100/80 hover:from-emerald-100 text-emerald-800 border-emerald-300 shadow-emerald-500/10"
               }`}
             >
-              {mode === "simulation" ? "SIMULASI" : "REAL"}
+              {mode === "real" ? (
+                <>
+                  <Cpu className="w-3.5 h-3.5 text-emerald-600 stroke-[2.2]" />
+                  <span>REAL</span>
+                </>
+              ) : (
+                <>
+                  <Sparkles className="w-3.5 h-3.5 text-amber-600 stroke-[2.2]" />
+                  <span>SIMULASI</span>
+                </>
+              )}
             </button>
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-2 rounded-xl text-slate-600 hover:text-slate-900 hover:bg-slate-100 border border-slate-200/60"
+              className="p-1.5 rounded-xl text-slate-600 hover:text-slate-900 hover:bg-slate-100 border border-slate-200/80 transition-colors shadow-xs"
               aria-label="Toggle menu"
             >
               {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}

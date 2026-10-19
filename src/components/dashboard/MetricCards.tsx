@@ -1,6 +1,6 @@
 "use client";
 
-import { Thermometer, Droplets, Sun, AlertCircle, WifiOff } from "lucide-react";
+import { Thermometer, Droplets, Sun, AlertCircle, WifiOff, Cpu, Sparkles } from "lucide-react";
 import { SensorData, OperatingMode } from "@/types/iot";
 
 interface Props {
