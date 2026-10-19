@@ -7,9 +7,13 @@ const path = require('path');
 const fs = require('fs');
 
 // Baca .env jika ada
+// Baca file .env.local atau .env
+const envLocalPath = path.resolve(__dirname, '../.env.local');
 const envPath = path.resolve(__dirname, '../.env');
-if (fs.existsSync(envPath)) {
-  const envContent = fs.readFileSync(envPath, 'utf-8');
+const targetEnv = fs.existsSync(envLocalPath) ? envLocalPath : (fs.existsSync(envPath) ? envPath : null);
+
+if (targetEnv) {
+  const envContent = fs.readFileSync(targetEnv, 'utf-8');
   envContent.split('\n').forEach(line => {
     const match = line.match(/^\s*([\w.-]+)\s*=\s*(.*)?\s*$/);
     if (match) {
@@ -21,11 +25,11 @@ if (fs.existsSync(envPath)) {
 }
 
 const dbConfig = {
-  host: process.env.DB_HOST || 'srv1412.hstgr.io',
+  host: process.env.DB_HOST || 'localhost',
   port: parseInt(process.env.DB_PORT || '3306', 10),
-  user: process.env.DB_USER || 'u500072377_smarthome',
-  password: process.env.DB_PASSWORD || 'Smarthm1234',
-  database: process.env.DB_NAME || 'u500072377_smarthome',
+  user: process.env.DB_USER || 'root',
+  password: process.env.DB_PASSWORD || '',
+  database: process.env.DB_NAME || 'smarthome',
   ssl: { rejectUnauthorized: false },
   connectTimeout: 10000
 };

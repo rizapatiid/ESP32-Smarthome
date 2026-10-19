@@ -103,14 +103,14 @@ npm install
 ```
 
 ### 3. Konfigurasi Environment Variable
-File `.env.local` telah dikonfigurasikan dengan kredensial Database Anda:
+Salin file `.env.example` menjadi `.env.local` dan sesuaikan kredensial Database Anda:
 ```env
-DATABASE_URL="mysql://u500072377_smarthome:Smarthm1234@srv1412.hstgr.io:3306/u500072377_smarthome"
-DB_HOST="srv1412.hstgr.io"
+DATABASE_URL="mysql://username:password@hostname:3306/database_name"
+DB_HOST="srvXXXX.hstgr.io"
 DB_PORT="3306"
-DB_USER="u500072377_smarthome"
-DB_PASSWORD="Smarthm1234"
-DB_NAME="u500072377_smarthome"
+DB_USER="username_database"
+DB_PASSWORD="password_database"
+DB_NAME="nama_database"
 IOT_MODE="simulation"
 DISCOVERY_UDP_PORT="8266"
 ```

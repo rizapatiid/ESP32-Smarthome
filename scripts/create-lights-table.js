@@ -1,12 +1,31 @@
 const mysql = require('mysql2/promise');
+const path = require('path');
+const fs = require('fs');
+
+// Baca file .env.local atau .env
+const envLocalPath = path.resolve(__dirname, '../.env.local');
+const envPath = path.resolve(__dirname, '../.env');
+const targetEnv = fs.existsSync(envLocalPath) ? envLocalPath : (fs.existsSync(envPath) ? envPath : null);
+
+if (targetEnv) {
+  const envContent = fs.readFileSync(targetEnv, 'utf-8');
+  envContent.split('\n').forEach((line) => {
+    const match = line.match(/^\s*([\w.-]+)\s*=\s*(.*)?\s*$/);
+    if (match) {
+      let value = match[2] || '';
+      if (value.startsWith('"') && value.endsWith('"')) value = value.slice(1, -1);
+      process.env[match[1]] = value;
+    }
+  });
+}
 
 async function main() {
   const pool = mysql.createPool({
-    host: 'srv1412.hstgr.io',
-    port: 3306,
-    user: 'u500072377_smarthome',
-    password: 'Smarthm1234',
-    database: 'u500072377_smarthome',
+    host: process.env.DB_HOST || 'localhost',
+    port: parseInt(process.env.DB_PORT || '3306', 10),
+    user: process.env.DB_USER || 'root',
+    password: process.env.DB_PASSWORD || '',
+    database: process.env.DB_NAME || 'smarthome',
     ssl: { rejectUnauthorized: false }
   });
 

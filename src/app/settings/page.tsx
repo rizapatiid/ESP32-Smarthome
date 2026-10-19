@@ -362,11 +362,11 @@ export default function SettingsPage() {
           </div>
           <div>
             <span className="text-slate-400 block text-[11px] font-sans">Nama Database:</span>
-            <span className="text-slate-800 font-semibold">{dbInfo?.database || "u500072377_smarthome"}</span>
+            <span className="text-slate-800 font-semibold">{dbInfo?.database || "smarthome"}</span>
           </div>
           <div>
             <span className="text-slate-400 block text-[11px] font-sans">User Database:</span>
-            <span className="text-slate-800 font-semibold">{dbInfo?.user || "u500072377_smarthome"}</span>
+            <span className="text-slate-800 font-semibold">{dbInfo?.user || "root"}</span>
           </div>
           <div className="sm:col-span-2">
             <span className="text-slate-400 block text-[11px] font-sans">Password Database:</span>

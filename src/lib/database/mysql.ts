@@ -9,11 +9,11 @@ let pool: Pool | null = null;
 
 export function getDatabasePool(): Pool {
   if (!pool) {
-    const host = process.env.DB_HOST || "srv1412.hstgr.io";
+    const host = process.env.DB_HOST || "localhost";
     const port = parseInt(process.env.DB_PORT || "3306", 10);
-    const user = process.env.DB_USER || "u500072377_smarthome";
-    const password = process.env.DB_PASSWORD || "Smarthm1234";
-    const database = process.env.DB_NAME || "u500072377_smarthome";
+    const user = process.env.DB_USER || "root";
+    const password = process.env.DB_PASSWORD || "";
+    const database = process.env.DB_NAME || "smarthome";
 
     pool = mysql.createPool({
       host,
