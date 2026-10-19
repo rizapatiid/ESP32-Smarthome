@@ -27,6 +27,7 @@ import {
   Layers,
   Database,
   SearchX,
+  Sparkles,
 } from "lucide-react";
 import { DeviceInfo } from "@/types/iot";
 import WiringSchematicModal, { ConfiguredLight } from "@/components/devices/WiringSchematicModal";
@@ -370,7 +371,7 @@ export default function DevicesPage() {
                   }`}
                 >
                   <div className="flex items-start justify-between gap-3">
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-3 min-w-0">
                       <div
                         className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 ${
                           isConnected
@@ -381,32 +382,42 @@ export default function DevicesPage() {
                         <Cpu className="w-5 h-5" />
                       </div>
                       <div className="min-w-0">
-                        <div className="flex items-center gap-1.5 flex-wrap">
-                          <h3 className="font-bold text-slate-900 text-sm sm:text-base truncate">
-                            {device.name}
-                          </h3>
-                          {isConnected && (
-                            <span className="text-[9px] font-extrabold px-1.5 py-0.5 rounded-full bg-blue-600 text-white tracking-wide">
-                              AKTIF
-                            </span>
-                          )}
-                        </div>
-                        <span className="text-[11px] text-slate-400 font-mono block">
+                        <h3 className="font-bold text-slate-900 text-sm sm:text-base truncate" title={device.name}>
+                          {device.name}
+                        </h3>
+                        <span className="text-[11px] text-slate-400 font-mono block truncate">
                           ID: {device.deviceId}
                         </span>
                       </div>
                     </div>
 
-                    <span
-                      className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold shrink-0 ${
-                        device.isOnline
-                          ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
-                          : "bg-slate-100 text-slate-600 border border-slate-200"
-                      }`}
-                    >
-                      <span className={`w-1.5 h-1.5 rounded-full ${device.isOnline ? "bg-emerald-500 animate-pulse" : "bg-slate-400"}`} />
-                      {device.isOnline ? "ONLINE" : "OFFLINE"}
-                    </span>
+                    {/* Status Badges Group (Rapi & Terstruktur di Kanan Atas) */}
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      {isConnected && (
+                        <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-blue-600 text-white tracking-wider uppercase shadow-xs">
+                          AKTIF
+                        </span>
+                      )}
+                      <span
+                        className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-extrabold tracking-wide border shadow-2xs shrink-0 ${
+                          device.isOnline
+                            ? "bg-emerald-50 text-emerald-700 border-emerald-300/80"
+                            : "bg-slate-100 text-slate-600 border-slate-200"
+                        }`}
+                      >
+                        {device.isOnline ? (
+                          <>
+                            <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+                            <span>ONLINE</span>
+                          </>
+                        ) : (
+                          <>
+                            <XCircle className="w-3 h-3 text-slate-400" />
+                            <span>OFFLINE</span>
+                          </>
+                        )}
+                      </span>
+                    </div>
                   </div>
 
                   {/* Metadata Perangkat (2x2 Micro Cards) */}
@@ -452,14 +463,15 @@ export default function DevicesPage() {
                     {device.capabilities?.map((cap) => (
                       <span
                         key={cap}
-                        className="px-2 py-0.5 rounded-md bg-slate-100 text-slate-600 text-[10px] font-bold uppercase tracking-wider"
+                        className="inline-flex items-center px-2 py-0.5 rounded-md bg-slate-100 text-slate-600 border border-slate-200/60 text-[10px] font-extrabold uppercase tracking-wider"
                       >
                         {cap}
                       </span>
                     ))}
                     {isSim && (
-                      <span className="px-2 py-0.5 rounded-md bg-amber-100 text-amber-800 text-[10px] font-bold">
-                        SIMULATOR VIRTUAL
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-50 text-amber-700 border border-amber-200 text-[10px] font-extrabold uppercase tracking-wider">
+                        <Sparkles className="w-2.5 h-2.5 text-amber-600" />
+                        Simulator Virtual
                       </span>
                     )}
                   </div>
