@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "migrate": "node scripts/migrate.js",
-    "discovery": "node scripts/discovery-daemon.js"
+    "discovery": "node scripts/discovery-daemon.js",
+    "mock:esp32": "node scripts/mock-esp32.js"
   },
   "dependencies": {
     "@prisma/client": "^6.19.3",
